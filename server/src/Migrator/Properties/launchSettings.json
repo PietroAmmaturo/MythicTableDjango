@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Migrator": {
+      "commandName": "Project",
+      "commandLineArgs": "mongodb://admin:abc123!@127.0.0.1 mythictable"
+    }
+  }
+}

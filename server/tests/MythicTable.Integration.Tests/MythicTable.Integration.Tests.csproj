@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="3.1.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
+    <PackageReference Include="Mongo2Go" Version="2.2.16" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="coverlet.collector" Version="1.3.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MythicTable\MythicTable.csproj" />
+    <ProjectReference Include="..\MythicTable.TestUtils\MythicTable.TestUtils.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+      <WwwRootFiles Include="wwwroot\**" />
+  </ItemGroup>
+
+  <Target Name="CopyWwwRootFiles" AfterTargets="AfterBuild">
+    <Copy SourceFiles="@(WwwRootFiles)" DestinationFolder="$(OutDir)wwwroot" />
+  </Target>
+  
+</Project>

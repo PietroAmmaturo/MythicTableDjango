@@ -1,0 +1,200 @@
+.modal-mask {
+    position: fixed;
+    z-index: 9998;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(3px);
+  }
+  
+.modal-container {
+    height: auto;
+    min-width: 50ch;
+    max-width: 150ch;
+    min-height: 25rem;
+    max-height: 90vh;
+    margin: 0px auto;
+    padding: 0px;
+    background: #31313a;
+    border-radius: 30px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
+    transition: all 0.3s ease;
+    display:flex;
+}
+
+.modal-container:not(.modal-container--minified) {
+    width: 80vw;
+}
+
+.modal-container--minified {
+    width: Min(70ch, 80vw);
+}
+
+.modal-container .left-panel {
+    display: flex;
+    flex: 0.65;
+
+    background: #1c1c1c;
+    padding: 20px;
+    align-items: center;
+    flex-direction: column;
+    user-select: none;
+}
+.modal-container .right-panel {
+    
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    box-sizing: content-box;
+    overflow-y: auto;
+}
+
+.action-buttons-container {
+    position: relative;
+    padding-bottom: 70px !important;
+}
+
+.modal-spacer {
+    flex-grow: 1;
+}
+.right-panel div.expand {
+    flex-grow: 1;
+    overflow: hidden;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+.modal-button {
+    width: 170px;
+    height: 33px;
+    /* Override Bootstrap */
+    &:not(.no-margin){
+        margin: 3px 2px !important;
+    }
+    padding: 0px;
+    
+
+    background: #444545;
+
+    font: lighter;
+    font-size: 15px;
+    user-select: none;
+
+    box-sizing: border-box;
+    &.expanded {
+        width:100%;
+    }
+}
+
+.modal-button:hover:not(:disabled) {
+    opacity: 0.8;
+
+}
+.modal-button:active {
+    opacity: 0.6;
+}
+
+.modal-button.selected {
+    background: #274d78;
+    border: 3px #3c77ba solid;
+}
+.accent-red {
+    $stripe-size: 10px;
+    $color-1: #c02d0c;
+    $color-2: #a8280b;
+    background: repeating-linear-gradient(
+        -45deg,
+        $color-1,
+        $color-1 $stripe-size,
+        $color-2 $stripe-size,
+        $color-2 $stripe-size*2
+    ) !important;
+}
+
+.accent-red-large {
+    $stripe-size: 30px;
+    $color-1: #c02d0c;
+    $color-2: #a8280b;
+    background: repeating-linear-gradient(
+        -45deg,
+        $color-1,
+        $color-1 $stripe-size,
+        $color-2 $stripe-size,
+        $color-2 $stripe-size*2
+    ) !important;
+}
+
+button:disabled,
+button[disabled] {
+    border: 3px solid #999999 !important;
+    background-color: #cccccc !important;
+    color: #666666;
+    cursor: default;
+}
+
+.modal-button.delete {
+    background: #b72d0c;
+
+    width: auto;
+    padding: 0px 10px;
+
+    img {
+        height: 1em;
+        width: 1em;
+        margin-bottom: 2px;
+    }
+}
+
+
+.modal-container .right-panel legend {
+    color: #afafaf;
+    padding-left: 8px;
+    font-size: 18px;
+    padding-top: 7px;
+    user-select: none;
+}
+  
+.modal-header h3 {
+    margin-top: 0;
+    color: #42b983;
+}
+  
+.modal-default-button {
+    float: right;
+}
+  
+/*
+* The following styles are auto-applied to elements with
+* transition="modal" when their visibility is toggled
+* by Vue.js.
+*
+* You can easily play with the modal transition by editing
+* these styles.
+*/
+  
+.modal-enter {
+    opacity: 0;
+}
+  
+.modal-leave-active {
+    opacity: 0;
+}
+  
+.modal-enter .modal-container,
+.modal-leave-active .modal-container {
+    -webkit-transform: scale(1.1);
+    transform: scale(1.1);
+}
+.action-buttons {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+}

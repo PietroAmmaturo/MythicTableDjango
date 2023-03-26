@@ -1,0 +1,15 @@
+* eol=lf
+*.cs eol=crlf
+*.csproj eol=crlf
+*.njsproj eol=crlf
+*.sln eol=crlf
+
+*.bmp binary
+*.gif binary
+*.jpg binary
+*.jpeg binary
+*.png binary
+
+*.ttf binary
+*.eot binary
+*.woff binary

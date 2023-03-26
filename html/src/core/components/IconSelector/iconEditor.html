@@ -1,0 +1,127 @@
+<!--
+    This is a dev-facing editor for the icons.json data file.
+    Launch the HTML file locally and pick the file in the repository. The
+    icon data will load automatically. You can add new tags and then copy
+    paste from the output textarea back into the icons.json file in your
+    editor.
+-->
+
+<html>
+    <head>
+        <style>
+            @font-face {
+                font-family: "rpg";
+                src: url("https://unpkg.com/rpg-awesome/fonts/rpgawesome-webfont.woff") format('woff');
+            }
+        </style>
+    </head>
+<body>
+
+<form id="jsonFile" name="jsonFile">
+
+  <fieldset>
+    <h2>Choose icons.json</h2>
+    <input type='file' id='fileinput' onchange='loadFile();'>
+  </fieldset>
+</form>
+
+<form id="entry">
+    <fieldset style="display: inline-block;">
+        <select id="icons" size="10" style="font-family: rpg; font-size: 1.5em" onchange="setSelected(this.selectedIndex)">
+        </select>
+    </fieldset>
+    <fieldset style="display: inline-block;">
+        <div>
+            <h1 id="icon" style="font-family: rpg">[ ]</h1>
+        </div>
+        <div>
+            <label>
+                Name
+                <input id="name" type="text" disabled value="" />
+            </label>
+        </div>
+        <div>
+            <label>
+                Category
+                <input id="category" type="text" disabled value="" />
+            </label>
+        </div>
+        <div>
+            <label>
+                Tags
+                <textarea id="tags" oninput="updateData()"></textarea>
+            </label>
+        </div>
+    </fieldset>
+</form>
+<h2>Copy the below to icons.json</h2>
+<textarea id="data" rows="10" cols="80"></textarea>
+
+<script type="text/javascript">
+    function loadFile() {
+        var input, file, fr;
+
+        if (typeof window.FileReader !== 'function') {
+            alert("The file API isn't supported on this browser yet.");
+            return;
+        }
+
+        input = document.getElementById('fileinput');
+        if (!input) {
+            alert("Um, couldn't find the fileinput element.");
+        }
+        else if (!input.files) {
+            alert("This browser doesn't seem to support the `files` property of file inputs.");
+        }
+        else if (!input.files[0]) {
+            alert("Please select a file before clicking 'Load'");
+        }
+        else {
+            file = input.files[0];
+            fr = new FileReader();
+            fr.onload = receivedText;
+            fr.readAsText(file);
+        }
+
+        function receivedText(e) {
+            let lines = e.target.result;
+            data = JSON.parse(lines);
+            console.log(data);
+            document.getElementById('data').innerText = JSON.stringify(data);
+            document.getElementById('icons').innerHTML = '';
+            data.forEach((icon, index) => {
+                let o = document.createElement('option');
+                o.value = index;
+                o.innerText = icon.unicode + ' ' + icon.name;
+                document.getElementById('icons').appendChild(o);
+            })
+            loadSelected();
+        }
+    }
+
+    var data = [
+        { "unicode": "\ue900", "name": "acid", "category": "danger" },
+    ];
+    var selected = 0;
+
+    function setSelected(e) {
+        console.log(e);
+        selected = e;
+        loadSelected();
+    }
+
+    function loadSelected() {
+        document.getElementById('icon').innerText = data[selected].unicode;
+        document.getElementById('name').value = data[selected].name;
+        document.getElementById('category').value = data[selected].category;
+        document.getElementById('tags').innerText = data[selected].tags ?? '';
+    }
+
+    function updateData() {
+        data[selected].tags = document.getElementById('tags').value?.split('\n').map(v => v.trim()).filter(v => v !== '');
+        document.getElementById('data').innerText = JSON.stringify(data);
+    }
+</script>
+
+</body>
+</html>

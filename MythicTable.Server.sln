@@ -1,0 +1,56 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29306.81
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MythicTable", "server\src\MythicTable\MythicTable.csproj", "{200A4777-253B-4653-855C-96E71ED9D9EA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9B9EA949-5590-445A-AD69-807E8466362E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MythicTable.Tests", "server\tests\MythicTable.Tests\MythicTable.Tests.csproj", "{5F7A2FB2-2B69-4047-8A46-9A79F64E5ED5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MythicTable.Integration.Tests", "server\tests\MythicTable.Integration.Tests\MythicTable.Integration.Tests.csproj", "{C42C4B39-06C3-4C18-8AFD-AF7B00536F41}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Migrator", "server\src\Migrator\Migrator.csproj", "{4BB4E590-1B75-4BD5-A958-6C20460831A0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MythicTable.TestUtils", "server\tests\MythicTable.TestUtils\MythicTable.TestUtils.csproj", "{EF1F84F7-F594-4F4F-B652-47788990863A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{200A4777-253B-4653-855C-96E71ED9D9EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{200A4777-253B-4653-855C-96E71ED9D9EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{200A4777-253B-4653-855C-96E71ED9D9EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{200A4777-253B-4653-855C-96E71ED9D9EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F7A2FB2-2B69-4047-8A46-9A79F64E5ED5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F7A2FB2-2B69-4047-8A46-9A79F64E5ED5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F7A2FB2-2B69-4047-8A46-9A79F64E5ED5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F7A2FB2-2B69-4047-8A46-9A79F64E5ED5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C42C4B39-06C3-4C18-8AFD-AF7B00536F41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C42C4B39-06C3-4C18-8AFD-AF7B00536F41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C42C4B39-06C3-4C18-8AFD-AF7B00536F41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C42C4B39-06C3-4C18-8AFD-AF7B00536F41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BB4E590-1B75-4BD5-A958-6C20460831A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BB4E590-1B75-4BD5-A958-6C20460831A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BB4E590-1B75-4BD5-A958-6C20460831A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BB4E590-1B75-4BD5-A958-6C20460831A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF1F84F7-F594-4F4F-B652-47788990863A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF1F84F7-F594-4F4F-B652-47788990863A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF1F84F7-F594-4F4F-B652-47788990863A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF1F84F7-F594-4F4F-B652-47788990863A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5F7A2FB2-2B69-4047-8A46-9A79F64E5ED5} = {9B9EA949-5590-445A-AD69-807E8466362E}
+		{C42C4B39-06C3-4C18-8AFD-AF7B00536F41} = {9B9EA949-5590-445A-AD69-807E8466362E}
+		{EF1F84F7-F594-4F4F-B652-47788990863A} = {9B9EA949-5590-445A-AD69-807E8466362E}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EC118AAA-5FEF-4AFC-A74C-C0F7FC3DFD25}
+	EndGlobalSection
+EndGlobal

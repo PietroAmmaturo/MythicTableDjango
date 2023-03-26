@@ -1,0 +1,14 @@
+
+$theme-colors: map-remove($theme-colors, "secondary");
+$theme-colors: (
+    "info": #007bff,
+    "custom-button": #899afd,
+    "secondary": #444444,
+    "custom-color": rgb(34, 51, 68),
+    "success": rgb(34, 51, 68)
+);
+
+$font-family-base: "Lato" !default;
+
+@import 'node_modules/bootstrap/scss/bootstrap';
+@import 'node_modules/bootstrap-vue/src/index.scss';

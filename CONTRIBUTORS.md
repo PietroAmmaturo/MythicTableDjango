@@ -1,0 +1,42 @@
+# Contributors
+
+These are the people responsible for what Mythic Table is today:
+
+- Marc Faulise
+- Victor Oliveira
+- Adam Sturge
+- Jon Winsley
+- Mirko Rainer (GRK)
+- Keith Valin
+- James Hatheway
+- Nikita Golev
+- Paul Sheean
+- Ankit Sangwan
+- Ben Milman
+- Jose Bonilla
+- Kelvin Phan
+- Lucas Teng
+- Bernhard Kelm
+- Santiago Mainetti
+- Jason Dunsmore
+- Weslley Rocha
+- Hunter Scheel
+- Andrew Chong
+- Kevin Cox
+- Josh Meijer
+- Barry deFreese
+- Luis Thelonious Fatás Arana
+- Logan McGuire
+- Haig Hagopian
+- Jason Friend
+- P.J. Leyden
+- Charlie Sellers
+- Ryan Leach
+- Peter J Kingston
+- Blaine Reid
+- Jose A. Rivera
+- Zachary Brown
+- Thomas Servo
+- Adrian Wróbel
+- Shane Logan
+- ...

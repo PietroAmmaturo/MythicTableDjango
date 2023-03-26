@@ -1,0 +1,9 @@
+Dockerfile
+.git/
+**/.gitignore
+
+html/node_modules/
+html/dist/
+
+server/**/bin/
+server/**/obj/

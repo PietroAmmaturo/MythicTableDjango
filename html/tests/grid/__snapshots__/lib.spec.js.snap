@@ -1,0 +1,222 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`findGrid 60 perspective_inn 1 1`] = `
+Object {
+  "cellSize": Object {
+    "height": 59.54866859941837,
+    "width": 59.54866859941837,
+  },
+  "offset": Object {
+    "x": 27.630823630663443,
+    "y": 16.16672531810564,
+  },
+}
+`;
+
+exports[`findGrid 60 perspective_inn rectangular 1`] = `
+Object {
+  "cellSize": Object {
+    "height": 112.98508555657122,
+    "width": 60.25889967637539,
+  },
+  "offset": Object {
+    "x": -18.077669902912533,
+    "y": -51.21990545231233,
+  },
+}
+`;
+
+exports[`findGrid 60 perspective_inn refine_grid 1`] = `
+Object {
+  "cellSize": Object {
+    "height": 125.74098057354308,
+    "width": 125.74098057354308,
+  },
+  "offset": Object {
+    "x": -32.72710453284037,
+    "y": 54.04341830541574,
+  },
+}
+`;
+
+exports[`findGrid 60 perspective_inn refine_grid half 1 1`] = `
+Object {
+  "cellSize": Object {
+    "height": 62.87049028677154,
+    "width": 62.87049028677154,
+  },
+  "offset": Object {
+    "x": 29.798889916743384,
+    "y": -7.406024207960582,
+  },
+}
+`;
+
+exports[`findGrid 60 perspective_inn refine_grid half 2 1`] = `
+Object {
+  "cellSize": Object {
+    "height": 62.87049028677154,
+    "width": 62.87049028677154,
+  },
+  "offset": Object {
+    "x": 29.971137835337277,
+    "y": -9.12848472302419,
+  },
+}
+`;
+
+exports[`findGrid 256 farmhouse 1 1`] = `
+Object {
+  "cellSize": Object {
+    "height": 138.04796430563303,
+    "width": 138.04796430563303,
+  },
+  "offset": Object {
+    "x": 8.953337051496268,
+    "y": 70.80786793400029,
+  },
+}
+`;
+
+exports[`findGrid 256 farmhouse bad +1 1`] = `
+Object {
+  "cellSize": Object {
+    "height": 8.28860869891713,
+    "width": 8.28860869891713,
+  },
+  "offset": Object {
+    "x": -4.139983052459229,
+    "y": -4.144304349458196,
+  },
+}
+`;
+
+exports[`findGrid 256 farmhouse bad +2 1`] = `
+Object {
+  "cellSize": Object {
+    "height": 255.01325932778298,
+    "width": 255.01325932778298,
+  },
+  "offset": Object {
+    "x": 20.997841504778442,
+    "y": 17.95427024556227,
+  },
+}
+`;
+
+exports[`findGrid 256 farmhouse bad +a lot 1`] = `
+Object {
+  "cellSize": Object {
+    "height": 255.84212149244524,
+    "width": 255.84212149244524,
+  },
+  "offset": Object {
+    "x": 6.207256655360515,
+    "y": 6.110142328299374,
+  },
+}
+`;
+
+exports[`findGrid 256 farmhouse bad 1`] = `
+Object {
+  "cellSize": Object {
+    "height": 8.28860869891713,
+    "width": 8.28860869891713,
+  },
+  "offset": Object {
+    "x": -4.140417879597938,
+    "y": -4.144304349458214,
+  },
+}
+`;
+
+exports[`findGrid 256 farmhouse min 1`] = `
+Object {
+  "cellSize": Object {
+    "height": 53.6535700300222,
+    "width": 53.6535700300222,
+  },
+  "offset": Object {
+    "x": 21.929252055866073,
+    "y": -11.780323912012099,
+  },
+}
+`;
+
+exports[`findGrid perfect clicks 1 1`] = `
+Object {
+  "cellSize": Object {
+    "height": 100,
+    "width": 100,
+  },
+  "offset": Object {
+    "x": 0,
+    "y": 0,
+  },
+}
+`;
+
+exports[`findGrid perfect clicks 2 1`] = `
+Object {
+  "cellSize": Object {
+    "height": 72,
+    "width": 72,
+  },
+  "offset": Object {
+    "x": 0,
+    "y": 0,
+  },
+}
+`;
+
+exports[`findGrid rectangular offset 1`] = `
+Object {
+  "cellSize": Object {
+    "height": 30,
+    "width": 10,
+  },
+  "offset": Object {
+    "x": -5,
+    "y": 5,
+  },
+}
+`;
+
+exports[`findGrid rectangular three 1`] = `
+Object {
+  "cellSize": Object {
+    "height": 30,
+    "width": 10,
+  },
+  "offset": Object {
+    "x": 0,
+    "y": 0,
+  },
+}
+`;
+
+exports[`findGrid rectangular two 1`] = `
+Object {
+  "cellSize": Object {
+    "height": 30,
+    "width": 10,
+  },
+  "offset": Object {
+    "x": 0,
+    "y": 0,
+  },
+}
+`;
+
+exports[`findGrid very good clicks 1`] = `
+Object {
+  "cellSize": Object {
+    "height": 104,
+    "width": 104,
+  },
+  "offset": Object {
+    "x": 2,
+    "y": -5.333333333333333,
+  },
+}
+`;

@@ -1,0 +1,49 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migrator
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: init-mongodb-allowlist
+          image: joselbonilla/mongocli-docker
+          env:
+            - name: MCLI_PUBLIC_API_KEY
+              valueFrom: 
+                secretKeyRef:
+                  name: mongodb-api
+                  key: public-mongodb-api-key
+            - name: MCLI_PRIVATE_API_KEY
+              valueFrom: 
+                secretKeyRef:
+                  name: mongodb-api
+                  key: private-mongodb-api-key
+            - name: MCLI_ORG_ID
+              value: 5e5af965a7b6f61bf0f40dcc
+            - name: MCLI_PROJECT_ID
+              value: 5e5af965a7b6f61bf0f40dd1
+            - name: MCLI_SERVICE
+              value: cloud
+      containers:
+      - name: migrator
+        image: registry.gitlab.com/mythicteam/mythictable/migrator:latest
+        command: ["dotnet", "/app/Migrator.dll", "$(MTT_MONGODB_CONNECTIONSTRING)", "$(MTT_MONGODB_DATABASENAME)"]  # There is a missing final argument here that will allow a version for backoffs
+        resources:
+        env:
+          - name: MTT_MONGODB_CONNECTIONSTRING
+            valueFrom:
+              secretKeyRef:
+                name: mongodb-settings
+                key: connectionstring
+          - name: MTT_MONGODB_DATABASENAME
+            valueFrom:
+              secretKeyRef:
+                name: mongodb-settings
+                key: database
+      restartPolicy: Never
+  backoffLimit: 2
+  ttlSecondsAfterFinished: 1
+status:
+  succeeded: 0

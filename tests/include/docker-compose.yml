@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  mythictest:
+    image: mythictable:gatling
+    build:
+      context: .
+      args:
+        USER_ID: ${USER_ID:-0}
+        GROUP_ID: ${GROUP_ID:-0}
+    volumes:
+      - ${PWD}/../conf:/opt/gatling/conf
+      - ${PWD}/../results:/opt/gatling/results
+      - ${PWD}/../user-files:/opt/gatling/user-files
+networks:
+  default:
+    external:
+      name: ${NETWORK_NAME}

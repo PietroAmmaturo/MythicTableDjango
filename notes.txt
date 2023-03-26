@@ -1,0 +1,1 @@
+vuex uses oidc for authentication the oidc provider seems to be keycloak to which I registered to make everything work on the first place, the server uses Jwt to handle acces tokens, I will use a python equivalent, I suppose keycloack sends the token to the server, how does the client tell keycloak to send the token to the server? Or does it happen the other way around?

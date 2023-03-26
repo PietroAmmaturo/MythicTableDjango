@@ -1,0 +1,12 @@
+<svg
+    viewBox="3 3 10 10"
+    xmlns="http://www.w3.org/2000/svg"
+>
+    <path
+        fill-rule="evenodd"
+        d="M 15 8 0 8"
+        stroke="#fff"
+        stroke-width="1"
+        fill="none"
+    />
+</svg>

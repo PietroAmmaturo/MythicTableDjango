@@ -1,0 +1,78 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    app.gitlab.com/env: <CI_ENVIRONMENT_SLUG>
+    app.gitlab.com/app: <CI_PROJECT_PATH_SLUG>
+  name: mythic-table
+  labels:
+    app: mythic-table
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mythic-table
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 33%
+  template:
+    metadata:
+      labels:
+        app: mythic-table
+    spec:
+      initContainers:
+        - name: init-mongodb-allowlist
+          image: joselbonilla/mongocli-docker
+          env:
+            - name: MCLI_PUBLIC_API_KEY
+              valueFrom: 
+                secretKeyRef:
+                  name: mongodb-api
+                  key: public-mongodb-api-key
+            - name: MCLI_PRIVATE_API_KEY
+              valueFrom: 
+                secretKeyRef:
+                  name: mongodb-api
+                  key: private-mongodb-api-key
+            - name: MCLI_ORG_ID
+              value: 5e5af965a7b6f61bf0f40dcc
+            - name: MCLI_PROJECT_ID
+              value: 5e5af965a7b6f61bf0f40dd1
+            - name: MCLI_SERVICE
+              value: cloud
+      serviceAccount: mythic-table-api-edge-ksa
+      containers:
+        - name: mythic-table
+          image: registry.gitlab.com/mythicteam/mythictable:<VERSION>
+          ports:
+            - containerPort: 80
+          env:
+            - name: MTT_MONGODB_CONNECTIONSTRING
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-settings
+                  key: connectionstring
+            - name: MTT_MONGODB_DATABASENAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-settings
+                  key: database
+            - name: MTT_USE_GCP_IMAGE_STORE
+              value: "true"
+            - name: MTT_GCP_BUCKET_IMAGES
+              value: "mythic-table-image-store-<CI_SCOPE>"
+            - name: MTT_AUTHORITY
+              value: "https://<KEY_DOMAIN>/auth/realms"
+            - name: MTT_REDIS_CONN_STRING
+              value: "redis-backplane"
+          livenessProbe:
+            tcpSocket:
+              port: 80
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 2
+            periodSeconds: 2

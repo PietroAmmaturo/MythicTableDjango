@@ -1,0 +1,4 @@
+**/*.user
+**/bin/
+**/obj/
+src/MythicIdentityServer/identityserver4_log.txt

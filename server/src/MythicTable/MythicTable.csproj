@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Version>0.1.0</Version>
+    <StartupObject></StartupObject>
+    <LangVersion>8.0</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Cloud.Storage.V1" Version="3.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="3.1.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.1">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="3.0.0" />
+    <PackageReference Include="Mongo2Go" Version="2.2.16" />
+    <PackageReference Include="MongoDB.Driver" Version="2.13.2" />
+    <PackageReference Include="NodaTime" Version="2.4.7" />
+    <PackageReference Include="NodaTime.Serialization.JsonNet" Version="2.2.0" />
+    <PackageReference Include="DiceRoller" Version="4.1.0" />
+    <PackageReference Include="Slugify.Core" Version="2.3.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="5.0.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.6.0" />
+  </ItemGroup>
+
+  <Target Name="SyncClientFiles">
+    <ItemGroup>
+      <ClientOutputFiles Include="../../../html/dist/**" Exclude="../../../**/.gitignore" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ClientOutputFiles)" DestinationFiles="@(ClientOutputFiles->'wwwroot/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="True">
+      <Output TaskParameter="CopiedFiles" ItemName="CopiedFiles" />
+    </Copy>
+    <ItemGroup>
+      <ObsoleteFiles Include="wwwroot/**" Exclude="@(CopiedFiles);wwwroot/.gitignore" />
+    </ItemGroup>
+  </Target>
+</Project>
