@@ -1,30 +1,9 @@
-from django.contrib.auth.models import User, Group
-from rest_framework import viewsets
-from rest_framework import permissions
-from Profile.serializers import UserSerializer, GroupSerializer, ProfileAPISerializer
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.response import Response
-import requests
-from os import environ
-import json
-import urllib.request
-import jwt;
-from django.contrib.auth.decorators import login_required
-from .models import Profile
+from .serializers import ProfileAPISerializer
 from .exceptions import ProfileNotFoundException, ProfileNotAuthorizedException, ProfileInvalidException
 from .providers import MongoDbProfileProvider
-from MythicTable.myAuth import MyAuthBackend
+from .utils import ProfileUtils
+from MythicTable.views import AuthorizedView
 from django.http import JsonResponse
-import json
-from django.contrib.auth.mixins import LoginRequiredMixin
-from bson import ObjectId, json_util
-from Profile.utils import ProfileUtils
-
-class AuthorizedView(APIView, LoginRequiredMixin):
-    authentication_classes = [MyAuthBackend]
-    permission_classes = [permissions.IsAuthenticated]
 
 class Me(AuthorizedView):
     def get(self, request):

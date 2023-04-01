@@ -1,7 +1,4 @@
-from datetime import datetime
-from typing import List
-from bson import ObjectId, json_util
-from django.contrib.auth.models import AbstractBaseUser
+from bson import ObjectId
 from django.db import models
 
 profile_schema = {
@@ -16,7 +13,7 @@ profile_schema = {
 
 
 class Profile(models.Model):
-    def __init__(self, _id: ObjectId, user_id: str, display_name: str, image_url: str, has_seen_FP_splash: bool, has_seen_KS_splash: bool, groups: List[str]):
+    def __init__(self, _id: ObjectId, user_id: str, display_name: str, image_url: str, has_seen_FP_splash: bool, has_seen_KS_splash: bool, groups: list[str]):
         self._id = _id
         self.user_id = user_id
         self.display_name = display_name

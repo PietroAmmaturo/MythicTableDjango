@@ -134,12 +134,12 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'MythicTable.myAuth.MyAuthBackend',
+        'MythicTable.authentication.AuthenticationBackend',
     ],
     # other settings
 }
 AUTHENTICATION_BACKENDS = [
-    'MythicTable.myAuth.MyAuthBackend',
+    'MythicTable.authentication.AuthenticationBackend',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True

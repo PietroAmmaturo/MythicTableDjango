@@ -1,10 +1,8 @@
-from datetime import datetime
-from typing import List
-import pymongo
 from .exceptions import ProfileNotFoundException, ProfileInvalidException
 from .models import Profile
 from .serializers import ProfileDBSerializer
-from bson import ObjectId, json_util
+import pymongo
+from bson import ObjectId
 
 client = pymongo.MongoClient('mongodb://admin:abc123!@localhost')
 for dbn in client.list_database_names():
@@ -16,7 +14,6 @@ db = client['admin']
 collection = db["profiles"]
 
 class MongoDbProfileProvider:
-
     # get using the userId
     def get_by_user_id(user_id: str):
         # Define the filter
@@ -34,8 +31,6 @@ class MongoDbProfileProvider:
         profile = serializer.create()
         return profile
 
-
-    
     # get using the mongoDB Object id
     def get(_id: ObjectId):
         # Define the filter
@@ -69,7 +64,6 @@ class MongoDbProfileProvider:
             if serializer.is_valid():
                 profiles.append(serializer.create())
         return profiles
-
         
     def create(profile: Profile):
         if profile == None:
@@ -85,7 +79,7 @@ class MongoDbProfileProvider:
             raise ProfileInvalidException(message)
         profile._id = result.inserted_id
         return profile
-
+    
     def update(profile: Profile):
         if profile == None:
             message = "The profile is None"
@@ -103,7 +97,7 @@ class MongoDbProfileProvider:
             message = f"Unable to update profile: {profile._id}, result: {result}"
             raise ProfileNotFoundException(message)
         return profile
-
+    
     def delete(_id: ObjectId):
         # Define the filter
         filter = {'_id': _id}

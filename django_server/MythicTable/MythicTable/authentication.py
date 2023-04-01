@@ -1,8 +1,6 @@
-from os import environ
 import json
 import urllib.request
 import jwt;
-from rest_framework.response import Response
 import requests
 from django.contrib.auth import get_user_model
 from rest_framework.authentication import BasicAuthentication
@@ -32,8 +30,7 @@ def decode_and_validate_token(token, jwks_url):
 def get_userinfo(token, userinfo_url):
     return requests.get(userinfo_url, headers={"Authorization": f"Bearer {token}"}).json()
 
-
-class MyAuthBackend(BasicAuthentication):
+class AuthenticationBackend(BasicAuthentication):
     def authenticate(self, request):
         # Get the JWT token from the Authorization header
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
