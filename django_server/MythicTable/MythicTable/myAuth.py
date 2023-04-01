@@ -42,7 +42,6 @@ class MyAuthBackend(BasicAuthentication):
         decoded = decode_and_validate_token(token, jwks_url)
         userinfo_url =  get_userinfo_url("https://key.mythictable.com/auth/realms/MythicTable") # the issuer is not in the header of the token
         userinfo = get_userinfo(token, userinfo_url)
-        print(userinfo)
         # Create a new Django user object or retrieve an existing one
         User = get_user_model()
         # The django user does not have profile information but its username is the userid of the profile
@@ -52,6 +51,6 @@ class MyAuthBackend(BasicAuthentication):
             user.email = userinfo['email']
             user.save()
         # Set the userinfo as a custom attribute of the request object
-        request.userinfo = userinfo
+        request.session["userinfo"] = userinfo
         return [user, None]
 

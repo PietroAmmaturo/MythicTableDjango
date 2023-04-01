@@ -15,15 +15,15 @@ Including another URLconf
 """
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from Profile.views import UserViewSet, GroupViewSet, me
+from Profile.views import ProfileView, Me
 
 router = DefaultRouter()
-router.register(r'groups', GroupViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('api/profiles/me', me, name="me"),
+    path('api/profiles/me', Me.as_view()),
+    path('api/profiles', ProfileView.as_view()),
 ]

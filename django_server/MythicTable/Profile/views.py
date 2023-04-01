@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
 from rest_framework import permissions
-from Profile.serializers import UserSerializer, GroupSerializer
+from Profile.serializers import UserSerializer, GroupSerializer, ProfileAPISerializer
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,49 +13,67 @@ import urllib.request
 import jwt;
 from django.contrib.auth.decorators import login_required
 from .models import Profile
-from .exceptions import ProfileNotFoundException
+from .exceptions import ProfileNotFoundException, ProfileNotAuthorizedException, ProfileInvalidException
 from .providers import MongoDbProfileProvider
+from MythicTable.myAuth import MyAuthBackend
 from django.http import JsonResponse
+import json
+from django.contrib.auth.mixins import LoginRequiredMixin
+from bson import ObjectId, json_util
+from Profile.utils import ProfileUtils
 
-
-@api_view(['GET', 'POST'])
-@login_required
-def me(request):
-    print(request.user)
-    userId = request.userinfo["sub"]
-    try:
-        profile = MongoDbProfileProvider.getByUserId(userId=userId)
-        #await updateGroups(profile)
-        return JsonResponse(profile.__dict__)
-    except ProfileNotFoundException:
-        # TODO - Come up with a better way create a display name 
-        # https://gitlab.com/mythicteam/mythictable/-/issues/145
-        userName = request.userinfo["preferred_username"]
-        displayName = userName.split("@")[0] if "@" in userName else userName
-        profile = Profile(userId=userId, displayName=displayName, imageUrl="", hasSeenFPSplash=False, hasSeenKSSplash=False, groups="")
-        #await first_time_setup(profile.id)
-        return JsonResponse(profile.__dict__)
-
-class MyView(APIView):
-    def get(self, request, *args, **kwargs):
-        current_user = request.user
-        return Response('authenticated with username (email): ' + current_user.username)
-
-class UserViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
-    queryset = User.objects.all().order_by('-date_joined')
-    serializer_class = UserSerializer
+class AuthorizedView(APIView, LoginRequiredMixin):
+    authentication_classes = [MyAuthBackend]
     permission_classes = [permissions.IsAuthenticated]
 
+class Me(AuthorizedView):
+    def get(self, request):
+        user_id = request.session["userinfo"]["sub"]
+        user_name = request.session["userinfo"]["preferred_username"]
+        groups = request.session["userinfo"]["groups"]
+        try:
+            profile = MongoDbProfileProvider.get_by_user_id(user_id=user_id)
+            update_groups(request, profile)
+            serializer = ProfileAPISerializer(profile)
+            return JsonResponse(serializer.data)
+        except ProfileNotFoundException:
+            #await first_time_setup(profile.id)
+            profile = MongoDbProfileProvider.create(ProfileUtils.create_default_profile(user_id=user_id, user_name=user_name, groups=groups))
+            serializer = ProfileAPISerializer(profile)
+            return JsonResponse(serializer.data)
 
+class ProfileView(AuthorizedView):
+    def get(self, request, userId=None):
+        if userId:
+            profile = MongoDbProfileProvider.get(userId)
+            serializer = ProfileAPISerializer(profile)
+            return JsonResponse(serializer.data)
+        else:
+            userIds = request.query_params.getlist('userId')
+            profiles = MongoDbProfileProvider.get(userIds)
+            serializer = ProfileAPISerializer(profiles, many=True)
+            return JsonResponse(serializer.data)
 
-class GroupViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
-    queryset = Group.objects.all()
-    serializer_class = GroupSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    def put(self, request):
+        user_id = request.session["userinfo"]["sub"]
+        groups = request.session["userinfo"]["groups"]
+        serializer = ProfileAPISerializer(data=request.data)
+        if not serializer.is_valid():
+            message = f"The profile provided from user: '{user_id}' is not valid; {serializer.errors}"
+            raise ProfileInvalidException(message)
+        profile = serializer.create()
+        id = MongoDbProfileProvider.get_by_user_id(user_id)._id
+        if not str(id) == str(profile._id):
+            raise ProfileNotAuthorizedException(f"User (user_id = '{user_id}', profile_id = '{id}') is not authorized to update profile: '{profile._id}'")
+        profile.groups = groups
+        serializer = ProfileAPISerializer(MongoDbProfileProvider.update(profile))
+        return JsonResponse(serializer.data)
 
+def update_groups(request, profile):
+        groups = request.session["userinfo"]["groups"]
+        if(len(groups) == 0 and profile.groups == None):
+            return True
+        elif ((profile.groups == None) or sorted(profile.groups) != sorted(groups)):
+            profile.groups = groups
+            MongoDbProfileProvider.update(profile)
+        return True

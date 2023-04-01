@@ -210,7 +210,7 @@ namespace MythicTable
             else
             {
                 var host = conn.Substring(conn.LastIndexOf('@') + 1);
-                Console.Out.WriteLine($"Using a mongodb datastore at {host} with db name {db}");
+                Console.Out.WriteLine($"Using a mongodb datastore at {host} with db name {db}, connection string: {conn}");
                 mongoSettings = new MongoDbSettings 
                 {
                     ConnectionString = conn,

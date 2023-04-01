@@ -1,32 +1,26 @@
 from datetime import datetime
 from typing import List
-import pymongo
-from bson import ObjectId
+from bson import ObjectId, json_util
 from django.contrib.auth.models import AbstractBaseUser
-
-client = pymongo.MongoClient('mongodb://admin:abc123!@localhost')
-db = client['admin']
-collection = db["profiles"]
+from django.db import models
 
 profile_schema = {
-    'userId': {'type': 'string', 'required': True},
-    'displayName': {'type': 'string', 'required': True},
-    'imageUrl': {'type': 'string', 'required': True},
-    'hasSeenFPSplash': {'type': 'boolean', 'required': True},
-    'hasSeenKSSplash': {'type': 'boolean', 'required': True},
-    'groups': {'type': 'list', 'schema': {'type': 'string'}, 'required': True},
-    'createdAt': {'type': 'datetime', 'required': True},
-    'updatedAt': {'type': 'datetime', 'required': True},
+    '_id': {'type': 'objectid'},
+    'user_id': {'type': 'string', 'required': True},
+    'display_name': {'type': 'string', 'required': True},
+    'image_url': {'type': 'string', 'required': True},
+    'has_seen_FP_splash': {'type': 'boolean', 'required': True},
+    'has_seen_KS_splash': {'type': 'boolean', 'required': True},
+    'groups': {'type': 'list', 'schema': {'type': 'string'}, 'required': True}
 }
 
 
-class Profile:
-    def __init__(self, userId: str, displayName: str, imageUrl: str, hasSeenFPSplash: bool, hasSeenKSSplash: bool, groups: List[str]):
-        self.userId = userId
-        self.displayName = displayName
-        self.imageUrl = imageUrl
-        self.hasSeenFPSplash = hasSeenFPSplash
-        self.hasSeenKSSplash = hasSeenKSSplash
+class Profile(models.Model):
+    def __init__(self, _id: ObjectId, user_id: str, display_name: str, image_url: str, has_seen_FP_splash: bool, has_seen_KS_splash: bool, groups: List[str]):
+        self._id = _id
+        self.user_id = user_id
+        self.display_name = display_name
+        self.image_url = image_url
+        self.has_seen_FP_splash = has_seen_FP_splash
+        self.has_seen_KS_splash = has_seen_KS_splash
         self.groups = groups
-        self.createdAt = datetime.utcnow()
-        self.updatedAt = datetime.utcnow()
