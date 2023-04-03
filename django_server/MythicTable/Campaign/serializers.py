@@ -18,13 +18,13 @@ class PlayerAPIField(serializers.Field):
             raise serializers.ValidationError(f"Invalid Players: {data} (to_representation)")
         
 class CampaignAPISerializer(serializers.ModelSerializer):
-    _id = ObjectIdAPIField(default=None, allow_null=True, required=False)
+    id = ObjectIdAPIField(default=None, allow_null=True, required=False, source='_id')
     joinId = serializers.CharField(default=None, allow_blank=True, allow_null=True, required=False, source='join_id')
     owner = serializers.CharField(allow_blank=True, allow_null=True, required=False)
     name = serializers.CharField()
     description = serializers.CharField()
     imageUrl = serializers.CharField(source='image_url')
-    created = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", input_formats=['%m/%d/%Y %H:%M:%Sv %Z', '%m/%d/%Y %H:%M:%Sv', '%m/%d/%Y %H:%M', '%m/%d/%Y %H:%M:%S', '%m/%d/%Y'])
+    created = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", input_formats=['%m/%d/%Y %H:%M:%Sv %Z', '%m/%d/%Y %H:%M:%Sv', '%m/%d/%Y %H:%M', '%m/%d/%Y %H:%M:%S', '%m/%d/%Y', '%Y-%m-%d %H:%M:%S'])
     lastModified = serializers.DateTimeField(required=False, source='last_modified')
     players = serializers.ListField(child=PlayerAPIField(), required=False)
     tutorialCampaign = serializers.BooleanField(default=False, source='tutorial_campaign')
@@ -32,7 +32,7 @@ class CampaignAPISerializer(serializers.ModelSerializer):
     # specify model and fields
     class Meta:
         model = Campaign
-        fields = ('_id', 'joinId', 'owner', 'name', 'description', 'imageUrl', 'created', 'lastModified', 'players', 'tutorialCampaign')
+        fields = ('id', 'joinId', 'owner', 'name', 'description', 'imageUrl', 'created', 'lastModified', 'players', 'tutorialCampaign')
 
     def create(self, validated_data):
         if isinstance(validated_data, list):

@@ -15,7 +15,7 @@ from rest_framework.decorators import permission_classes
 class CampaignListView(AuthorizedView):
     def get(self, request):
         user_id = request.session["userinfo"]["sub"]
-        campaigns = MongoDbCampaignProvider.get_all(profile_id=MongoDbProfileProvider.get_by_user_id(user_id=user_id)._id)
+        campaigns = MongoDbCampaignProvider.get_all(profile_id=str(MongoDbProfileProvider.get_by_user_id(user_id=user_id)._id))
         serializer = CampaignAPISerializer(campaigns, many=True)
         print(serializer.data)
         return JsonResponse(serializer.data, safe=False)
@@ -52,4 +52,12 @@ class CampaignByIdView(AuthorizedView):
         campaign = serializer.create(serializer.validated_data)
         serializer = CampaignAPISerializer(MongoDbCampaignProvider.update(id, campaign))
         return JsonResponse(serializer.data)
+    
+    @permission_classes([UserOwnsCampaign])
+    def delete(self, request, id=None):
+        campaign = MongoDbCampaignProvider.get(id)
+        MongoDbCampaignProvider.delete(id)
+        serializer = CampaignAPISerializer(campaign)
+        return JsonResponse(serializer.data)
+    
 
