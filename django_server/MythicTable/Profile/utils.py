@@ -21,7 +21,8 @@ class ProfileUtils:
     @staticmethod
     def create_default_profile(user_id, user_name, groups):
         return Profile(
-            _id = b'000000000000',
+            # the _id can really be anything since it will be overwritten when inserting the profile in the DB using the ProfileProvider
+            _id = None,
             user_id = user_id,
             display_name=user_name.split("@")[0] if "@" in user_name else user_name,
             image_url= ProfileUtils.get_random_image(),

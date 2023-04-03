@@ -1,19 +1,9 @@
 from rest_framework import serializers
 from .models import Profile
-from bson import ObjectId
-        
-class ObjectIdAPIField(serializers.Field):
-    def to_representation(self, value):
-        return str(value)
+from MythicTable.serializers import ObjectIdAPIField, ObjectIdDBField
 
-    def to_internal_value(self, data):
-        try:
-            return ObjectId(data)
-        except:
-            raise serializers.ValidationError("Invalid ObjectId")
-        
 class ProfileAPISerializer(serializers.ModelSerializer):
-    id = ObjectIdAPIField(source='_id')
+    id = ObjectIdAPIField(default=None, allow_null=True, required=False, source='_id')
     userId = serializers.CharField(source='user_id')
     displayName = serializers.CharField(source='display_name')
     imageUrl = serializers.CharField(source='image_url')
@@ -26,24 +16,18 @@ class ProfileAPISerializer(serializers.ModelSerializer):
         model = Profile
         fields = ('id', 'userId', 'displayName', 'imageUrl', 'hasSeenFPSplash', 'hasSeenKSSplash', 'groups')
 
-    def create(self):
-        instance_data = self.validated_data
+    def create(self, validated_data):
+        if isinstance(validated_data, list):
+            # If validated_data is a list, create an instance for each dictionary
+            return [self.create_instance(instance_data) for instance_data in validated_data]
+        else:
+            # If validated_data is not a list, create a single instance
+            return self.create_instance(validated_data)
+
+    def create_instance(self, instance_data):
         profile = Profile(**instance_data)
         return profile
 
-class ObjectIdDBField(serializers.Field):
-    def to_representation(self, value):
-        try:
-            return ObjectId(value)
-        except:
-            raise serializers.ValidationError(f"Invalid ObjectId: {value} (to_representation)")
-
-    def to_internal_value(self, data):
-        try:
-            return ObjectId(data)
-        except:
-            raise serializers.ValidationError(f"Invalid ObjectId: {data} (to_internal_value)")
-        
 class ProfileDBSerializer(serializers.ModelSerializer):
     _id = ObjectIdDBField()
     UserId = serializers.CharField(source='user_id')
@@ -58,7 +42,14 @@ class ProfileDBSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ('_id', 'UserId', 'DisplayName', 'ImageUrl', 'HasSeenFPSplash', 'HasSeenKSSplash', 'Groups')
 
-    def create(self):
-        instance_data = self.validated_data
+    def create(self, validated_data):
+        if isinstance(validated_data, list):
+            # If validated_data is a list, create an instance for each dictionary
+            return [self.create_instance(instance_data) for instance_data in validated_data]
+        else:
+            # If validated_data is not a list, create a single instance
+            return self.create_instance(validated_data)
+
+    def create_instance(self, instance_data):
         profile = Profile(**instance_data)
         return profile

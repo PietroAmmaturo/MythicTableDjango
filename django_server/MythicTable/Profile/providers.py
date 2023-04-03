@@ -28,7 +28,7 @@ class MongoDbProfileProvider:
         if not serializer.is_valid():
             message = f"The profile associated with user: '{user_id}' stored in the DB is not valid; {serializer.errors}"
             raise ProfileInvalidException(message)
-        profile = serializer.create()
+        profile = serializer.create(serializer.validated_data)
         return profile
 
     # get using the mongoDB Object id
@@ -44,7 +44,7 @@ class MongoDbProfileProvider:
         # Deserialization
         serializer = ProfileDBSerializer(data=dto)
         if serializer.is_valid():
-            profile = serializer.create()
+            profile = serializer.create(serializer.validated_data)
             return profile
 
     
@@ -62,7 +62,7 @@ class MongoDbProfileProvider:
             # Deserialization
             serializer = ProfileDBSerializer(data=dto)
             if serializer.is_valid():
-                profiles.append(serializer.create())
+                profiles.append(serializer.create(serializer.validated_data))
         return profiles
         
     def create(profile: Profile):

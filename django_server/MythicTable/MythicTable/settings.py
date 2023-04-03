@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "rest_framework",
     'rest_framework_simplejwt',
-    'Profile'
+    'Profile',
+    'Campaign'
 ]
 
 MIDDLEWARE = [

@@ -15,7 +15,8 @@ Including another URLconf
 """
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from Profile.views import ProfileView, Me
+from Profile.views import ProfileView, ProfileListView, Me
+from Campaign.views import CampaignListView, CampaignByIdView
 
 router = DefaultRouter()
 
@@ -25,5 +26,8 @@ urlpatterns = [
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/profiles/me', Me.as_view()),
-    path('api/profiles', ProfileView.as_view()),
+    path('api/profiles/<str:userId>', ProfileView.as_view()),
+    path('api/profiles', ProfileListView.as_view()),
+    path('api/campaigns', CampaignListView.as_view()),
+    path('api/campaigns/<str:id>', CampaignByIdView.as_view(), name='campaign-detail'),
 ]
