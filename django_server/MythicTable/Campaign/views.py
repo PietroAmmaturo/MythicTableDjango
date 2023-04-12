@@ -35,7 +35,7 @@ class CampaignListView(AuthorizedView):
         headers = {'Location': reverse('campaign-detail', args=[str(created_campaign._id)], request=request)}
         return Response(serializer.data, status=HTTP_201_CREATED, headers=headers)
     
-class CampaignByIdView(AuthorizedView):
+class CampaignView(AuthorizedView):
     @permission_classes([UserIsMemberOfCampaign])
     def get(self, request, id=None):
         campaign = MongoDbCampaignProvider.get(id)
@@ -60,7 +60,7 @@ class CampaignByIdView(AuthorizedView):
         serializer = CampaignAPISerializer(campaign)
         return JsonResponse(serializer.data)
 
-class CampaignByJoinIdView(AuthorizedView):
+class CampaignJoinView(AuthorizedView):
     def get(self, request, joinId=None):
         campaign = MongoDbCampaignProvider.get_by_join_id(joinId)
         serializer = CampaignAPISerializer(campaign)
