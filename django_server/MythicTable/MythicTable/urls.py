@@ -16,7 +16,7 @@ Including another URLconf
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from Profile.views import ProfileView, ProfileListView, Me
-from Campaign.views import CampaignListView, CampaignByIdView
+from Campaign.views import CampaignListView, CampaignByIdView, CampaignByJoinIdView, CampaignLeaveView, CampaignForceLeaveView, CampaignMessagesView, CampaignPlayersView
 
 router = DefaultRouter()
 
@@ -28,6 +28,12 @@ urlpatterns = [
     path('api/profiles/me', Me.as_view()),
     path('api/profiles/<str:userId>', ProfileView.as_view()),
     path('api/profiles', ProfileListView.as_view()),
+    
     path('api/campaigns', CampaignListView.as_view()),
+    path('api/campaigns/join/<str:joinId>', CampaignByJoinIdView.as_view()),
     path('api/campaigns/<str:id>', CampaignByIdView.as_view(), name='campaign-detail'),
+    path('api/campaigns/<str:id>/players', CampaignPlayersView.as_view()),
+    path('api/campaigns/<str:id>/messages', CampaignMessagesView.as_view()),   
+    path('api/campaigns/<str:id>/leave', CampaignLeaveView.as_view()),
+    path('api/campaigns/<str:id>/forceLeave/<str:playerId>', CampaignForceLeaveView.as_view()),
 ]

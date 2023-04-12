@@ -1,11 +1,39 @@
 from datetime import datetime
 from bson import ObjectId
 from django.db import models
-
-class Player:
+from Textparsing.models import Chat
+class Player(models.Model):
     def __init__(self, _id: ObjectId, name: str):
         self._id = _id
         self.name = name
+
+class Message(models.Model):
+    def __init__(self, _id: ObjectId, timestamp: int, user_id: str, display_name: str,
+                 session_id: str, message: str, result: Chat, client_id: str,
+                 context: dict[str, object]):
+        self._id: ObjectId = _id
+        self.Timestamp: int = timestamp
+        self.UserId: str = user_id
+        self.DisplayName: str = display_name
+        self.SessionId: str = session_id
+        self.Message: str = message
+        self.Result: Chat = result
+        self.ClientId: str = client_id
+        self.Context: dict[str, object] = context
+
+    def __eq__(self, other):
+        if not isinstance(other, Message):
+            return False
+        return self.Message == other.Message
+
+    def __hash__(self):
+        return hash((self.Id, self.Timestamp, self.UserId, self.DisplayName,
+                     self.SessionId, self.Message, self.Result))
+
+class MessageContainer(models.Model):
+    def __init__(self, _id: ObjectId, messages: list[Message]):
+        self._id = _id
+        self.messages = messages
 
 class Campaign(models.Model):
     def __init__(self, _id: ObjectId, join_id: str, owner: str, name: str,
