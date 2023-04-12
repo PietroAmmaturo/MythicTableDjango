@@ -21,15 +21,16 @@ class CampaignUtils:
         campaign.join_id = CampaignUtils.generate_join_id()
         campaign.owner = owner
 
-        # todo: when collections are done rewrite this using the view (or maybe by redirecting the client)
-        MongoDbCollectionProvider.create_by_campaign(
-            owner, 
-            "maps", 
-            campaign._id, 
-            MapUtils.create_map("/static/assets/tutorial/thank-you.jpg", 37, 25, 140)
+        created_campaign = MongoDbCampaignProvider.create(campaign)
+
+        created_collection = MongoDbCollectionProvider.create_by_campaign(
+            user_id = str(owner), 
+            collection = "maps", 
+            campaign_id = str(created_campaign._id), 
+            j_object = MapUtils.create_map("/static/assets/tutorial/thank-you.jpg", 37, 25, 140)
         )
 
-        return campaign
+        return created_campaign
 
     @staticmethod
     def generate_join_id():

@@ -29,7 +29,7 @@ class CampaignListView(AuthorizedView):
             raise CampaignInvalidException(message)
         print(serializer.validated_data)
         campaign = serializer.create(serializer.validated_data)
-        created_campaign = MongoDbCampaignProvider.create(CampaignUtils.create_default_campaign(owner=MongoDbProfileProvider.get_by_user_id(user_id=user_id)._id, campaign=campaign))
+        created_campaign = CampaignUtils.create_default_campaign(owner=MongoDbProfileProvider.get_by_user_id(user_id=user_id)._id, campaign=campaign)
         serializer = CampaignAPISerializer(created_campaign)
         print(str(created_campaign._id))
         headers = {'Location': reverse('campaign-detail', args=[str(created_campaign._id)], request=request)}
@@ -37,26 +37,26 @@ class CampaignListView(AuthorizedView):
     
 class CampaignView(AuthorizedView):
     @permission_classes([UserIsMemberOfCampaign])
-    def get(self, request, id=None):
-        campaign = MongoDbCampaignProvider.get(id)
+    def get(self, request, campaignId=None):
+        campaign = MongoDbCampaignProvider.get(campaignId)
         serializer = CampaignAPISerializer(campaign)
         return JsonResponse(serializer.data)
     
     @permission_classes([UserOwnsCampaign])
-    def put(self, request, id=None):
+    def put(self, request, campaignId=None):
         user_id = request.session["userinfo"]["sub"]
         serializer = CampaignAPISerializer(data=request.data)
         if not serializer.is_valid():
             message = f"The campaign provided from user: '{user_id}' is not valid; {serializer.errors}"
             raise CampaignInvalidException(message)
         campaign = serializer.create(serializer.validated_data)
-        serializer = CampaignAPISerializer(MongoDbCampaignProvider.update(id, campaign))
+        serializer = CampaignAPISerializer(MongoDbCampaignProvider.update(campaignId, campaign))
         return JsonResponse(serializer.data)
     
     @permission_classes([UserOwnsCampaign])
-    def delete(self, request, id=None):
-        campaign = MongoDbCampaignProvider.get(id)
-        MongoDbCampaignProvider.delete(id)
+    def delete(self, request, campaignId=None):
+        campaign = MongoDbCampaignProvider.get(campaignId)
+        MongoDbCampaignProvider.delete(campaignId)
         serializer = CampaignAPISerializer(campaign)
         return JsonResponse(serializer.data)
 
@@ -73,37 +73,37 @@ class CampaignJoinView(AuthorizedView):
 
 class CampaignLeaveView(AuthorizedView):
     permission_classes = [UserIsMemberOfCampaign]
-    def put(self, request, id, playerId):
+    def put(self, request, campaignId, playerId):
         player = get_current_user()
-        campaign = MongoDbCampaignProvider.remove_player(id, player)
+        campaign = MongoDbCampaignProvider.remove_player(campaignId, player)
         serializer = CampaignAPISerializer(campaign)
         return JsonResponse(serializer.data)
     
 class CampaignForceLeaveView(AuthorizedView):
     permission_classes = [UserOwnsCampaign]
-    def put(self, request, id, playerId):
-        campaign = MongoDbCampaignProvider.get(id)
+    def put(self, request, campaignId, playerId):
+        campaign = MongoDbCampaignProvider.get(campaignId)
         player_data = {"name" : f"{playerId}"}
         serializer = PlayerAPISerializer(data = player_data)
         if not serializer.is_valid():
             message = f"The profile id: '{playerId}' is not a valid player name: {serializer.errors}"
             raise CampaignInvalidException(message)
         player = serializer.create(serializer.validated_data)
-        campaign = MongoDbCampaignProvider.remove_player(id, player)
+        campaign = MongoDbCampaignProvider.remove_player(campaignId, player)
         serializer = CampaignAPISerializer(campaign)
         return JsonResponse(serializer.data)
         
 class CampaignMessagesView(AuthorizedView):
     permission_classes = [UserIsMemberOfCampaign]
-    def get(self, request, id):
-        messages = MongoDbCampaignProvider.get_messages(id, request.query_params.get('pageSize', 50), request.query_params.get('page', 1))
+    def get(self, request, campaignId):
+        messages = MongoDbCampaignProvider.get_messages(campaignId, request.query_params.get('pageSize', 50), request.query_params.get('page', 1))
         serializer = MessageAPISerializer(messages, many=True)
         return JsonResponse(serializer.data)
     
 class CampaignPlayersView(AuthorizedView):
     permission_classes = [UserIsMemberOfCampaign]
-    def get(self, id):
-        players = MongoDbCampaignProvider.get_players(id)
+    def get(self, campaignId):
+        players = MongoDbCampaignProvider.get_players(campaignId)
         serializer = MessageAPISerializer(players, many=True)
         return JsonResponse(serializer.data)
     

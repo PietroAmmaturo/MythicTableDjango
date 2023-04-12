@@ -45,15 +45,16 @@ class ProfileView(AuthorizedView):
     """
     API view for a single profile by ID.
     """
-    def get(self, request, userId=None, format=None):
-        profile = MongoDbProfileProvider.get(userId)
+    def get(self, request, profileId=None, format=None):
+        profile = MongoDbProfileProvider.get(profileId)
         serializer = ProfileAPISerializer(profile)
         return Response(serializer.data)
 
 class ProfileListView(AuthorizedView):
     def get(self, request):
-        userIds = request.query_params.getlist('userId')
-        profiles = MongoDbProfileProvider.get(userIds)
+        # userId is mandatory even if thoose are actually profile Id
+        profileIds = request.query_params.getlist('userId')
+        profiles = MongoDbProfileProvider.get(profileIds)
         serializer = ProfileAPISerializer(profiles, many=True)
         return Response(serializer.data)
     

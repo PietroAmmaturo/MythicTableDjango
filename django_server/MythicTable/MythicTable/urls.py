@@ -17,7 +17,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from Profile.views import ProfileView, ProfileListView, MeView
 from Campaign.views import CampaignListView, CampaignView, CampaignJoinView, CampaignLeaveView, CampaignForceLeaveView, CampaignMessagesView, CampaignPlayersView
-
+from Collections.views import CollectionView, CollectionCampaignView, CollectionProfileView
 router = DefaultRouter()
 
 # Wire up our API using automatic URL routing.
@@ -26,14 +26,19 @@ urlpatterns = [
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/profiles/me', MeView.as_view()),
-    path('api/profiles/<str:userId>', ProfileView.as_view()),
+    path('api/profiles/<str:profileId>', ProfileView.as_view()),
     path('api/profiles', ProfileListView.as_view()),
 
     path('api/campaigns', CampaignListView.as_view()),
     path('api/campaigns/join/<str:joinId>', CampaignJoinView.as_view()),
-    path('api/campaigns/<str:id>', CampaignView.as_view(), name='campaign-detail'),
-    path('api/campaigns/<str:id>/players', CampaignPlayersView.as_view()),
-    path('api/campaigns/<str:id>/messages', CampaignMessagesView.as_view()),   
-    path('api/campaigns/<str:id>/leave', CampaignLeaveView.as_view()),
-    path('api/campaigns/<str:id>/forceLeave/<str:playerId>', CampaignForceLeaveView.as_view()),
+    path('api/campaigns/<str:campaignId>', CampaignView.as_view(), name='campaign-detail'),
+    path('api/campaigns/<str:campaignId>/players', CampaignPlayersView.as_view()),
+    path('api/campaigns/<str:campaignId>/messages', CampaignMessagesView.as_view()),   
+    path('api/campaigns/<str:campaignId>/leave', CampaignLeaveView.as_view()),
+    path('api/campaigns/<str:campaignId>/forceLeave/<str:playerId>', CampaignForceLeaveView.as_view()),
+
+    path('api/collections/<str:collectionId>', CollectionView.as_view()), 
+    path('api/campaigns/<str:collectionId>/id/<str:profileId>', CollectionProfileView.as_view()),
+    path('api/campaigns/<str:collectionId>/campaign/<str:campaignId>', CollectionCampaignView.as_view()),
+    path('api/campaigns/<str:collectionId>/campaign/<str:campaignId>/id/<str:itemId>', CollectionCampaignView.as_view()),
 ]
