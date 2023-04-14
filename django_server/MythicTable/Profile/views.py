@@ -60,7 +60,6 @@ class ProfileListView(AuthorizedView):
         return Response(serializer.data)
     
     def put(self, request):
-        print(request)
         user_id = request.session["userinfo"]["sub"]
         groups = request.session["userinfo"]["groups"]
         serializer = ProfileAPISerializer(data=request.data)

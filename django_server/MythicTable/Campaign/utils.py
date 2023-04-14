@@ -42,7 +42,6 @@ class CampaignUtils:
             try:
                 found = MongoDbCampaignProvider.get_by_join_id(join_id=join_id)
                 join_id = CampaignJoinIdGenerator.generate()
-                print(join_id)
                 numAttempts += 1
             except CampaignNotFoundException:
                 return join_id
@@ -70,13 +69,15 @@ class CampaignUtils:
             ("Tauren", "Tauren", "", "circle", "#1ba73e", 3),
             ("marcOld", "Elf", "", "circle", "#3802b8", 2)
         ]
-        for char in characters:
-            MongoDbCollectionProvider.create_by_campaign(
-                owner,
+        created_characters = []
+        for character in characters:
+            c = MongoDbCollectionProvider.create_by_campaign(
+                str(owner),
                 "characters",
-                campaign["_id"],
-                CharacterUtil.create_collection_character(b"00000000", char[0], char[1], char[2], char[3], char[4], char[5])
+                str(campaign._id),
+                CharacterUtil.create_collection_character(character[0], character[1], character[2], character[3], character[4], character[5])
             )
+            created_characters.append(c)
 
         # Create maps
         map1 = {
@@ -86,7 +87,7 @@ class CampaignUtils:
             "Scale": 140,
             "start": {"n": 2, "w": 2, "s": 12, "e": 18}
         }
-        map1 = MongoDbCollectionProvider.create_by_campaign(owner, "maps", campaign["_id"], map1)
+        map1 = MongoDbCollectionProvider.create_by_campaign(str(owner), "maps", str(campaign._id), map1)
 
         map2 = {
             "ImageUrl": "/static/assets/tutorial/drawing-tools-chat.jpg",
@@ -95,7 +96,7 @@ class CampaignUtils:
             "Scale": 140,
             "start": {"n": 2, "w": 2, "s": 12, "e": 18}
         }
-        map2 = MongoDbCollectionProvider.create_by_campaign(owner, "maps", campaign["_id"], map2)
+        map2 = MongoDbCollectionProvider.create_by_campaign(str(owner), "maps", str(campaign._id), map2)
 
         map3 = {
             "ImageUrl": "/static/assets/tutorial/thank-you.jpg",
@@ -103,32 +104,32 @@ class CampaignUtils:
             "Height": 25,
             "Scale": 140
         }
-        map3 = MongoDbCollectionProvider.create_by_campaign(owner, "maps", campaign["_id"], map3)
+        map3 = MongoDbCollectionProvider.create_by_campaign(str(owner), "maps", str(campaign._id), map3)
 
         # Create tokens
         tokens = [
-            ("marc", "Marc", "Human fighter", "circle", "#000000", "marcToken", map1["_id"], 5, 7, None),
-            ("sarah", "Sarah", "Elven wizard", "circle", "#1ba73e", "sarahToken", map1["_id"], 28, 19, None),
-            ("Wolf", "Wolf", "Big bad wolf", "circle", "#c02d0c", "wolfToken", map1["_id"], 25, 6, None, 3),
-            ("Redcap", "Goblin 1", "Goblin rogue", "circle", "#c02d0c", "redcapToken1", map1["_id"], 27, 7, None, 1),
-            ("Redcap", "Goblin 2", "Goblin rogue", "circle", "#c02d0c", "redcapToken2", map1["_id"], 26, 8, None, 1),
-            ("Redcap", "Goblin 3", "Goblin rogue", "circle", "#c02d0c", "redcapToken3", map1["_id"], 24, 6, None, 1),
-            ("sarah", "Sarah", "Elven wizard", "circle", "#1ba73e", "sarahToken", map2["_id"], 6, 6, None),
-            ("Redcap", "Goblin 1", "Goblin rogue", "circle", "#c02d0c", "redcapToken1", map2["_id"], 11, 6, None, 1),
-            ("Redcap", "Goblin 2", "Goblin rogue", "circle", "#c02d0c", "redcapToken2", map2["_id"], 11, 7, None, 1),
-            ("Redcap", "Goblin 3", "Goblin rogue", "circle", "#c02d0c", "redcapToken3", map2["_id"], 10, 6, None, 1),
-            ("marcOld", "Marc", "Elven fighter", "circle", "#3802b8", "elfToken", map2["_id"], 26, 7, None),
-            ("Tauren", "Ogre", "Ogre mauler", "circle", "#1ba73e", "ogreToken", map2["_id"], 28, 6, None, 3)
+            ("marc", "Marc", "Human fighter", "circle", "#000000", str(created_characters[0]["_id"]), map1["_id"], 5, 7, None),
+            ("sarah", "Sarah", "Elven wizard", "circle", "#1ba73e", str(created_characters[1]["_id"]), map1["_id"], 28, 19, None),
+            ("Wolf", "Wolf", "Big bad wolf", "circle", "#c02d0c", str(created_characters[3]["_id"]), map1["_id"], 25, 6, None, 3),
+            ("Redcap", "Goblin 1", "Goblin rogue", "circle", "#c02d0c", str(created_characters[2]["_id"]), map1["_id"], 27, 7, None, 1),
+            ("Redcap", "Goblin 2", "Goblin rogue", "circle", "#c02d0c", str(created_characters[2]["_id"]), map1["_id"], 26, 8, None, 1),
+            ("Redcap", "Goblin 3", "Goblin rogue", "circle", "#c02d0c", str(created_characters[2]["_id"]), map1["_id"], 24, 6, None, 1),
+            ("sarah", "Sarah", "Elven wizard", "circle", "#1ba73e", str(created_characters[1]["_id"]), map2["_id"], 6, 6, None),
+            ("Redcap", "Goblin 1", "Goblin rogue", "circle", "#c02d0c", str(created_characters[2]["_id"]), map2["_id"], 11, 6, None, 1),
+            ("Redcap", "Goblin 2", "Goblin rogue", "circle", "#c02d0c", str(created_characters[2]["_id"]), map2["_id"], 11, 7, None, 1),
+            ("Redcap", "Goblin 3", "Goblin rogue", "circle", "#c02d0c", str(created_characters[2]["_id"]), map2["_id"], 10, 6, None, 1),
+            ("marcOld", "Marc", "Elven fighter", "circle", "#3802b8", str(created_characters[5]["_id"]), map2["_id"], 26, 7, None),
+            ("Tauren", "Ogre", "Ogre mauler", "circle", "#1ba73e", str(created_characters[4]["_id"]), map2["_id"], 28, 6, None, 3)
         ]
         for token in tokens:
             MongoDbCollectionProvider.create_by_campaign(
-                owner,
+                str(owner),
                 "characters",
-                campaign["_id"],
-                CharacterUtil.create_collection_token(b"00000000", token[0], token[1], token[2], token[3], token[4], token[5], token[6], token[7], token[8], token[9], token[10])
+                str(campaign._id),
+                CharacterUtil.create_collection_token(token[0], token[1], token[2], token[3], token[4], token[5], token[6], token[7], token[8], token[9])
             )
         
-        MongoDbCollectionProvider.create_by_campaign(b"00000000", owner, "players", campaign["_id"], MapUtils.create_player(map1["_id"], owner))
+        MongoDbCollectionProvider.create_by_campaign(str(owner), "players", str(campaign._id), MapUtils.create_player(map1["_id"], owner))
 
 class MapUtils:
     @staticmethod
@@ -150,36 +151,33 @@ class MapUtils:
                 ]
             }}
         }}"""
-        print(json_data.strip())  # print 20 characters before and after the error position
         return json.loads(json_data.strip())
 
     @staticmethod
     def create_player(map_id, user_id):
         return json.loads(f"""{{
             "mapId": "{map_id}",
-            "userId": "{user_id}",
-        }}""")
+            "userId": "{user_id}"
+        }}""".strip())
     
 class CharacterUtil:
     @staticmethod
-    def create_collection_character(id, image, name, description, border_mode, border_color, token_size=2, icon=None):
+    def create_collection_character(image, name, description, border_mode, border_color, token_size=2, icon=None):
         return json.loads(f"""{{
             "_character_version": 1,
-            "_id": ObjectId("{id}"),
             "image": "/static/assets/{image}.png",
             "name": "{name}",
             "description": "{description}",
             "borderMode": "{border_mode}",
             "borderColor": "{border_color}",
-            "tokenSize": {token_size},
-        }}""", object_hook=bson.json_util.object_hook)
+            "tokenSize": {token_size}
+        }}""".strip())
 
     @staticmethod
-    def create_collection_token(id, image, name, description, border_mode, border_color, token_id, map_id, x, y, background_color, token_size=2):
+    def create_collection_token(image, name, description, border_mode, border_color, character_id, map_id, x, y, background_color, token_size=2):
         return json.loads(f"""{{
             "_character_version": 1,
             "_token_version": 1,
-            "_id": ObjectId("{token_id}"),
             "image": "/static/assets/{image}.png",
             "name": "{name}",
             "description": "{description}",
@@ -192,5 +190,5 @@ class CharacterUtil:
                 "r": {y}
             }},
             "backgroundColor": "{background_color}",
-            "character": ObjectId("{id}")
-        }}""", object_hook=bson.json_util.object_hook)
+            "character": "{character_id}"
+        }}""".strip())

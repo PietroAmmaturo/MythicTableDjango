@@ -33,7 +33,8 @@ class MongoDbCollectionProvider:
         ).to_list(length=None)
         results = [MongoDbCollectionProvider._bson_to_json(bson_result) for bson_result in bson_results]
         if not results:
-            print(f"Could not find collection '{collection_id}' for user '{user_id}'")
+            message = f"Could not find collection '{collection_id}' for user '{user_id}'"
+            raise MythicTableException(message)
         return results
 
     def get(user_id: str, collection_id: str, obj_id: str) -> dict:
@@ -47,7 +48,6 @@ class MongoDbCollectionProvider:
             pass
 
         message = f"Could not find item '{obj_id}' in collection '{collection_id}' for user '{user_id}'"
-        print(message)
         raise NotFound(message)
 
     def delete(MongoDbCollectionProvider, user_id: str, collection_id: str, obj_id: str) -> int:
@@ -55,7 +55,8 @@ class MongoDbCollectionProvider:
             {MongoDbCollectionProvider.COLLECTION_FIELD: collection_id, MongoDbCollectionProvider.USER_ID_FIELD: user_id, '_id': ObjectId(obj_id)}
         )
         if not result.deleted_count:
-            print(f"Could not delete item '{obj_id}' in collection '{collection_id}' for user '{user_id}'")
+            message = f"Could not delete item '{obj_id}' in collection '{collection_id}' for user '{user_id}'"
+            raise MythicTableException(message)
         return result.deleted_count
 
     def update(user_id: str, collection_id: str, obj_id: str, patch: dict) -> int:
@@ -65,18 +66,20 @@ class MongoDbCollectionProvider:
             {'$set': bson_patch}
         )
         if not result.modified_count:
-            print(f"Could not update item '{obj_id}' in collections_collection '{collection_id}' for user '{user_id}'")
+            message = f"Could not update item '{obj_id}' in collections_collection '{collection_id}' for user '{user_id}'"
+            raise MythicTableException(message)
         return result.modified_count
 
     def create_by_campaign(user_id, collection, campaign_id, j_object):
-        j_object.pop("_id", None)
         bson = loads(dumps(j_object))
+        if '_id' in bson:
+            del bson['_id']
         bson[MongoDbCollectionProvider.USER_ID_FIELD] = user_id
         bson[MongoDbCollectionProvider.COLLECTION_FIELD] = collection
         bson[MongoDbCollectionProvider.CAMPAIGN_FIELD] = campaign_id
         result = collections_collection.insert_one(bson)
+        bson["_id"] = result.inserted_id
         a = collections_collection.find_one({"_id" : ObjectId(str(result.inserted_id))})
-        print("result", result, bson, a)
         return loads(dumps(bson))
 
     def get_list_by_campaign(collection_id, campaign_id):
@@ -86,7 +89,8 @@ class MongoDbCollectionProvider:
         }).to_list(length=None)
         if results:
             return [loads(dumps(result)) for result in results]
-        print(f"Could not find collection '{collection_id}' for campaign '{campaign_id}'")
+        message = f"Could not find collection '{collection_id}' for campaign '{campaign_id}'"
+        raise MythicTableException(message)
         return []
 
     def get_by_campaign(collection_id, campaign_id, id):
@@ -99,7 +103,6 @@ class MongoDbCollectionProvider:
         if bson:
             return loads(dumps(bson))
         message = f"Could not find item '{id}' in collection '{collection_id}' for campaign '{campaign_id}'"
-        print(message)
         raise MythicTableException(message)
 
     def update_by_campaign(collection_id, campaign_id, id, patch):
@@ -110,18 +113,19 @@ class MongoDbCollectionProvider:
         }
         updated = MongoDbCollectionProvider.internal_update(patch, filter)
         if updated == 0:
-            print(f"Could not update item '{id}' in collection '{collection_id}' for campaign '{campaign_id}'")
+            message = f"Could not update item '{id}' in collection '{collection_id}' for campaign '{campaign_id}'"
+            raise MythicTableException(message)
         return updated
 
     def delete_by_campaign(collection_id, campaign_id, id):
-        print("---Actually removing from DB")
         deleted = collections_collection.delete_one({
             MongoDbCollectionProvider.COLLECTION_FIELD: collection_id,
             MongoDbCollectionProvider.CAMPAIGN_FIELD: campaign_id,
             "_id": ObjectId(id)
         })
         if deleted.deleted_count == 0:
-            print(f"Could not delete item '{id}' in collection '{collection_id}' for campaign '{campaign_id}'")
+            message = f"Could not delete item '{id}' in collection '{collection_id}' for campaign '{campaign_id}'"
+            raise MythicTableException(message)
         return deleted.deleted_count
 
     def internal_update(patch, filter):

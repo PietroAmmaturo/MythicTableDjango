@@ -117,7 +117,7 @@ namespace MythicTable.Campaign.Util
             map3 = await collectionProvider.CreateByCampaign(owner, "maps", campaign.Id, map3);
 
             // Add tokens to maps
-
+            // PROBLEM: fields are not significant
             await collectionProvider.CreateByCampaign(
                 owner,
                 "tokens",

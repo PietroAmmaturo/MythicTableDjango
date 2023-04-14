@@ -18,7 +18,6 @@ class CampaignListView(AuthorizedView):
         profile_id = str(MongoDbProfileProvider.get_by_user_id(user_id=user_id)._id)
         campaigns = MongoDbCampaignProvider.get_all(profile_id=profile_id)
         serializer = CampaignAPISerializer(campaigns, many=True)
-        print(serializer.data)
         return JsonResponse(serializer.data, safe=False)
     
     def post(self, request):
@@ -27,11 +26,9 @@ class CampaignListView(AuthorizedView):
         if not serializer.is_valid():
             message = f"The campaign provided from user: '{user_id}' is not valid: {serializer.errors}"
             raise CampaignInvalidException(message)
-        print(serializer.validated_data)
         campaign = serializer.create(serializer.validated_data)
         created_campaign = CampaignUtils.create_default_campaign(owner=MongoDbProfileProvider.get_by_user_id(user_id=user_id)._id, campaign=campaign)
         serializer = CampaignAPISerializer(created_campaign)
-        print(str(created_campaign._id))
         headers = {'Location': reverse('campaign-detail', args=[str(created_campaign._id)], request=request)}
         return Response(serializer.data, status=HTTP_201_CREATED, headers=headers)
     
