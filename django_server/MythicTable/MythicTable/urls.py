@@ -18,6 +18,7 @@ from rest_framework.routers import DefaultRouter
 from Profile.views import ProfileView, ProfileListView, MeView
 from Campaign.views import CampaignListView, CampaignView, CampaignJoinView, CampaignLeaveView, CampaignForceLeaveView, CampaignMessagesView, CampaignPlayersView
 from Collections.views import CollectionView, CollectionCampaignView, CollectionProfileView
+from Permissions.views import PermissionsView
 router = DefaultRouter()
 
 # Wire up our API using automatic URL routing.
@@ -41,4 +42,6 @@ urlpatterns = [
     path('api/campaigns/<str:collectionId>/id/<str:profileId>', CollectionProfileView.as_view()),
     path('api/campaigns/<str:collectionId>/campaign/<str:campaignId>', CollectionCampaignView.as_view()),
     path('api/campaigns/<str:collectionId>/campaign/<str:campaignId>/id/<str:itemId>', CollectionCampaignView.as_view()),
+
+    path('api/[controller]/<str:campaignId>', PermissionsView.as_view()),
 ]
