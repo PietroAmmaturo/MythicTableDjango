@@ -5,7 +5,7 @@ from .utils import ProfileUtils
 from MythicTable.views import AuthorizedView
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
-
+from Campaign.utils import CampaignUtils
 class MeView(AuthorizedView):
     """
     API view for the authenticated user's profile.
@@ -30,6 +30,7 @@ class MeView(AuthorizedView):
             message = f"The default profile created for user: '{user_id}' is not valid: {serializer.errors}"
             raise ProfileInvalidException(message)
         profile = MongoDbProfileProvider.create(serializer.create(validated_data=serializer.validated_data))
+        CampaignUtils.create_tutorial_campaign(profile._id)
         return profile
 
     def update_groups(self, request, profile):

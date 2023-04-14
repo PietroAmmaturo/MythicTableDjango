@@ -9,6 +9,8 @@ from .exceptions import CampaignInvalidException, CampaignNotFoundException
 from .providers import MongoDbCampaignProvider
 from Collections.providers import MongoDbCollectionProvider
 import json
+import datetime
+import random
 
 class CampaignUtils:
     @staticmethod
@@ -45,6 +47,88 @@ class CampaignUtils:
             except CampaignNotFoundException:
                 return join_id
         raise Exception("Could not find a Join Id in a reasonable time. Try again later.")
+
+    def create_tutorial_campaign(owner):
+        campaign = Campaign(_id=None,
+                            join_id=None,
+                            owner=owner,
+                            name="Tutorial Campaign",
+                            tutorial_campaign=True,
+                            description="A campaign designed to get you familiar with the features of MythicTable",
+                            created=datetime.datetime.now(),
+                            last_modified=datetime.datetime.now(),
+                            image_url="/static/assets/tutorial/campaign-banner.jpg",
+                            players=[])
+        campaign = MongoDbCampaignProvider.create(campaign)
+
+        # Create characters
+        characters = [
+            ("marc", "Marc", "Human fighter", "circle", "#000000", 2),
+            ("sarah", "Sarah", "Elven wizard", "circle", "#1ba73e", 2),
+            ("Redcap", "Redcap", "Goblin rogue", "circle", "#c02d0c", 1),
+            ("Wolf", "Wolf", "", "circle", "#c02d0c", 3),
+            ("Tauren", "Tauren", "", "circle", "#1ba73e", 3),
+            ("marcOld", "Elf", "", "circle", "#3802b8", 2)
+        ]
+        for char in characters:
+            MongoDbCollectionProvider.create_by_campaign(
+                owner,
+                "characters",
+                campaign["_id"],
+                CharacterUtil.create_collection_character(b"00000000", char[0], char[1], char[2], char[3], char[4], char[5])
+            )
+
+        # Create maps
+        map1 = {
+            "ImageUrl": "/static/assets/tutorial/basic-map-interactions.jpg",
+            "Width": 37,
+            "Height": 25,
+            "Scale": 140,
+            "start": {"n": 2, "w": 2, "s": 12, "e": 18}
+        }
+        map1 = MongoDbCollectionProvider.create_by_campaign(owner, "maps", campaign["_id"], map1)
+
+        map2 = {
+            "ImageUrl": "/static/assets/tutorial/drawing-tools-chat.jpg",
+            "Width": 37,
+            "Height": 25,
+            "Scale": 140,
+            "start": {"n": 2, "w": 2, "s": 12, "e": 18}
+        }
+        map2 = MongoDbCollectionProvider.create_by_campaign(owner, "maps", campaign["_id"], map2)
+
+        map3 = {
+            "ImageUrl": "/static/assets/tutorial/thank-you.jpg",
+            "Width": 37,
+            "Height": 25,
+            "Scale": 140
+        }
+        map3 = MongoDbCollectionProvider.create_by_campaign(owner, "maps", campaign["_id"], map3)
+
+        # Create tokens
+        tokens = [
+            ("marc", "Marc", "Human fighter", "circle", "#000000", "marcToken", map1["_id"], 5, 7, None),
+            ("sarah", "Sarah", "Elven wizard", "circle", "#1ba73e", "sarahToken", map1["_id"], 28, 19, None),
+            ("Wolf", "Wolf", "Big bad wolf", "circle", "#c02d0c", "wolfToken", map1["_id"], 25, 6, None, 3),
+            ("Redcap", "Goblin 1", "Goblin rogue", "circle", "#c02d0c", "redcapToken1", map1["_id"], 27, 7, None, 1),
+            ("Redcap", "Goblin 2", "Goblin rogue", "circle", "#c02d0c", "redcapToken2", map1["_id"], 26, 8, None, 1),
+            ("Redcap", "Goblin 3", "Goblin rogue", "circle", "#c02d0c", "redcapToken3", map1["_id"], 24, 6, None, 1),
+            ("sarah", "Sarah", "Elven wizard", "circle", "#1ba73e", "sarahToken", map2["_id"], 6, 6, None),
+            ("Redcap", "Goblin 1", "Goblin rogue", "circle", "#c02d0c", "redcapToken1", map2["_id"], 11, 6, None, 1),
+            ("Redcap", "Goblin 2", "Goblin rogue", "circle", "#c02d0c", "redcapToken2", map2["_id"], 11, 7, None, 1),
+            ("Redcap", "Goblin 3", "Goblin rogue", "circle", "#c02d0c", "redcapToken3", map2["_id"], 10, 6, None, 1),
+            ("marcOld", "Marc", "Elven fighter", "circle", "#3802b8", "elfToken", map2["_id"], 26, 7, None),
+            ("Tauren", "Ogre", "Ogre mauler", "circle", "#1ba73e", "ogreToken", map2["_id"], 28, 6, None, 3)
+        ]
+        for token in tokens:
+            MongoDbCollectionProvider.create_by_campaign(
+                owner,
+                "characters",
+                campaign["_id"],
+                CharacterUtil.create_collection_token(b"00000000", token[0], token[1], token[2], token[3], token[4], token[5], token[6], token[7], token[8], token[9], token[10])
+            )
+        
+        MongoDbCollectionProvider.create_by_campaign(b"00000000", owner, "players", campaign["_id"], MapUtils.create_player(map1["_id"], owner))
 
 class MapUtils:
     @staticmethod
