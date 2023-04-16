@@ -2,6 +2,7 @@ from datetime import datetime
 from bson import ObjectId
 from django.db import models
 from Textparsing.models import Chat
+
 class Player(models.Model):
     def __init__(self, _id: ObjectId, name: str):
         self._id = _id
