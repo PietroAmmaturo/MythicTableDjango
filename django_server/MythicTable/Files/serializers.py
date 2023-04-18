@@ -3,7 +3,7 @@ from .models import File
 from MythicTable.serializers import ObjectIdAPIField, ObjectIdDBField
 
 class FileAPISerializer(serializers.ModelSerializer):
-    _id = ObjectIdDBField(source='id')
+    id = ObjectIdAPIField(default=None, allow_null=True, required=False, source='_id')
     reference = serializers.CharField()
     path = serializers.CharField()
     name = serializers.CharField()
@@ -14,7 +14,7 @@ class FileAPISerializer(serializers.ModelSerializer):
     # specify model and fields
     class Meta:
         model = File
-        fields = ('_id', 'reference', 'path', 'name', 'user', 'url', 'md5')
+        fields = ('id', 'reference', 'path', 'name', 'user', 'url', 'md5')
 
     def create(self, validated_data):
         if isinstance(validated_data, list):

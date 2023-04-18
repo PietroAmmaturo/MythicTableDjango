@@ -14,8 +14,8 @@ db = client['admin']
 files_collection = db["files"]
 
 class MongoDbFileProvider:
-    def delete(self, file_id: str, user_id: str) -> File:
-        file = self.get(file_id, user_id)
+    def delete(file_id: str, user_id: str) -> File:
+        file = MongoDbFileProvider.get(file_id, user_id)
         result = files_collection.delete_one({"_id": ObjectId(file_id)})
         if (not result.acknowledged):
             message = f"Unable to delete file of _id: {file_id}, result {result}"
@@ -23,7 +23,7 @@ class MongoDbFileProvider:
         return file
 
 
-    def get(self, file_id: str, user_id: str) -> File:
+    def get(file_id: str, user_id: str) -> File:
         filter = {"_id": ObjectId(file_id)}
         dto = files_collection.find_one(filter)
         if dto is None:
@@ -38,7 +38,7 @@ class MongoDbFileProvider:
             raise FileStorageException(f"File '{file_id}' does not belong to user '{user_id}'")
         return file
 
-    def get_all(self, user_id: str) -> list[File]:
+    def get_all(user_id: str) -> list[File]:
         filter = {"user": user_id}
         dtos = files_collection.find(filter)
         # Deserialization
@@ -49,7 +49,7 @@ class MongoDbFileProvider:
         files = serializer.create(serializer.validated_data)
         return files
 
-    def filter(self, user_id: str, file_filter: str) -> list[File]:
+    def filter(user_id: str, file_filter: str) -> list[File]:
         mongo_filter = {"user": user_id}
         if file_filter is not None and file_filter is not None and file_filter != "":
             mongo_filter["path"] = file_filter
@@ -62,7 +62,7 @@ class MongoDbFileProvider:
         files = serializer.create(serializer.validated_data)
         return files
 
-    def create(self, file: File) -> File:
+    def create(file: File) -> File:
         # Serialization
         serializer = FileDBSerializer(file)
         new_file = serializer.data
@@ -74,9 +74,11 @@ class MongoDbFileProvider:
         file._id = result.inserted_id
         return file
 
-    def find_duplicate(self, user_id: str, md5: str) -> File:
+    def find_duplicate(user_id: str, md5: str) -> File:
         filter_query = {"user": user_id, "md5": md5}
         dto = files_collection.find_one(filter_query)
+        if dto is None:
+            return dto
         # Deserialization
         serializer = FileDBSerializer(data=dto)
         if not serializer.is_valid():

@@ -14,11 +14,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 from Profile.views import ProfileView, ProfileListView, MeView
 from Campaign.views import CampaignListView, CampaignView, CampaignJoinView, CampaignLeaveView, CampaignForceLeaveView, CampaignMessagesView, CampaignPlayersView
 from Collections.views import CollectionView, CollectionCampaignView, CollectionProfileView
 from Permissions.views import PermissionsView
+from Files.views import FileListView, FileView
 router = DefaultRouter()
 
 # Wire up our API using automatic URL routing.
@@ -44,4 +47,8 @@ urlpatterns = [
     path('api/campaigns/<str:collectionId>/campaign/<str:campaignId>/id/<str:itemId>', CollectionCampaignView.as_view()),
 
     path('api/[controller]/<str:campaignId>', PermissionsView.as_view()),
-]
+
+    path('api/files', FileListView.as_view()),
+    path('api/files/<str:fileId>', FileView.as_view()),
+    
+]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
