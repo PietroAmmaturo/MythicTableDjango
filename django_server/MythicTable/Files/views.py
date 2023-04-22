@@ -58,7 +58,7 @@ class FileView(LocalFileStoreView):
     def get(self, request, fileId=None, format=None):
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(MongoDbProfileProvider.get_by_user_id(user_id=user_id)._id)
-        file = MongoDbFileProvider.get(file_id=file_id, profile_id=profile_id)
+        file = MongoDbFileProvider.get(file_id=fileId, profile_id=profile_id)
         serializer = FileAPISerializer(file)
         return Response(serializer.data)
     
