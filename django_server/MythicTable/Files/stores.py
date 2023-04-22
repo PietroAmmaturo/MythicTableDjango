@@ -26,7 +26,7 @@ class LocalFileStore(IFileStore):
         file_name = self._create_random_file_name(form_file.name, user_id)
         file_path = os.path.join(self.path, file_name)
         FileWriter.create_directory(os.path.dirname(file_path))
-        path = FileWriter.copy_to_file(BytesIO(form_file.read()), file_path)
+        path = FileWriter.copy_to_file(form_file, file_path)
         return {"reference": path, "url": self.url_prefix + file_name}
 
     def delete_files(self, files: list[File]) -> None:
@@ -36,7 +36,6 @@ class LocalFileStore(IFileStore):
         random_str = ''.join(random.choices(string.ascii_lowercase, k=6))
         time_str = datetime.datetime.utcnow().strftime("%Y-%m-%d-%H-%M-%S-%f")
         return f"{random_str}-{user_id}-{time_str}{Path(original_name).suffix}"
-
 
 class IFileWriter:
     def create_directory(path: str) -> None:
@@ -52,11 +51,11 @@ class IFileWriter:
 class FileWriter(IFileWriter):
     def create_directory(path: str) -> None:
         os.makedirs(path, exist_ok=True)
-
-    def copy_to_file(file: BytesIO, file_path: str) -> str:
-        with open(file_path, "wb") as f:
-            f.write(file.read())
-        return file_path
+    
+    def copy_to_file(file: UploadedFile, file_path: str):
+        with open(file_path, 'wb+') as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
 
     def delete_files(file_paths: list[str]) -> None:
         for path in file_paths:
