@@ -3,23 +3,19 @@ from .models import Profile
 from .serializers import ProfileDBSerializer
 import pymongo
 from bson import ObjectId
+from MythicTable.providers import MongoDbProvider
 
-client = pymongo.MongoClient('mongodb://admin:abc123!@localhost')
-for dbn in client.list_database_names():
-    print("db", dbn)
-    db = client[dbn]
-    for coll in db.list_collection_names():
-        print("coll", coll)
-db = client['admin']
-collection = db["profiles"]
+class MongoDbProfileProvider(MongoDbProvider):
+    def __init__(self, client=None, db_name=None):
+        super().__init__(client, db_name)
+        self.profile_collection = self.db['profiles']
 
-class MongoDbProfileProvider:
     # get using the userId
-    def get_by_user_id(user_id: str):
+    def get_by_user_id(self, user_id: str):
         # Define the filter
         filter = {"UserId": user_id}
         # Find the first document that matches the filter
-        dto = collection.find_one(filter)
+        dto = self.profile_collection.find_one(filter)
         if dto is None:
             message = f"Cannot find user by id: {user_id}"
             raise ProfileNotFoundException(message)
@@ -32,12 +28,12 @@ class MongoDbProfileProvider:
         return profile
 
     # get using the mongoDB Object id
-    def get(_id: ObjectId):
+    def get(self, _id: ObjectId):
         # Define the filter
         filter = {"_id": _id}
-        cursor = collection.find({})
+        cursor = self.profile_collection.find({})
         # Find the first document that matches the filter
-        dto = collection.find_one(filter)
+        dto = self.profile_collection.find_one(filter)
         if dto is None:
             message = f"Cannot find user: {_id}"
             raise ProfileNotFoundException(message)
@@ -49,13 +45,13 @@ class MongoDbProfileProvider:
 
     
     # get all the profile objects
-    def get(_ids: list[ObjectId]):
+    def get(self, _ids: list[ObjectId]):
         profiles = []
         for _id in _ids:
             # Define the filter
             filter = {"_id": _id}
             # Find the first document that matches the filter
-            dto = collection.find_one(filter)
+            dto = self.profile_collection.find_one(filter)
             if dto is None:
                 message = f"Cannot find user: {_id}"
                 raise ProfileNotFoundException(message)
@@ -65,7 +61,7 @@ class MongoDbProfileProvider:
                 profiles.append(serializer.create(serializer.validated_data))
         return profiles
         
-    def create(profile: Profile):
+    def create(self, profile: Profile):
         if profile == None:
             message = "The profile is None"
             raise ProfileInvalidException(message)
@@ -73,14 +69,14 @@ class MongoDbProfileProvider:
         serializer = ProfileDBSerializer(profile)
         newProfile = serializer.data
         del newProfile['_id']
-        result = collection.insert_one(newProfile)
+        result = self.profile_collection.insert_one(newProfile)
         if (not result.acknowledged):
             message = f"Unable to create profile, result {result}"
             raise ProfileInvalidException(message)
         profile._id = result.inserted_id
         return profile
     
-    def update(profile: Profile):
+    def update(self, profile: Profile):
         if profile == None:
             message = "The profile is None"
             raise ProfileInvalidException(message)
@@ -91,17 +87,17 @@ class MongoDbProfileProvider:
         filter = {'_id': profile._id}
         # Serialization
         serializer = ProfileDBSerializer(profile)
-        result = collection.replace_one(filter, serializer.data)
+        result = self.profile_collection.replace_one(filter, serializer.data)
         if (not result.acknowledged or
             result.matched_count == 0):
             message = f"Unable to update profile: {profile._id}, result: {result}"
             raise ProfileNotFoundException(message)
         return profile
     
-    def delete(_id: ObjectId):
+    def delete(self, _id: ObjectId):
         # Define the filter
         filter = {'_id': _id}
-        result = collection.delete_one(filter)
+        result = self.profile_collection.delete_one(filter)
         if (not result.acknowledged or
             result.deleted_count == 0):
             message = f"Unable to delete profile: {_id}, result: {result}"

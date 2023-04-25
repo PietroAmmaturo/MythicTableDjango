@@ -17,15 +17,17 @@ class CampaignUtils:
     def create_default_campaign(
             owner: str,
             campaign: Campaign,
+            campaign_provider: MongoDbCampaignProvider,
+            collection_provider: MongoDbCollectionProvider,
         ):
         if campaign is None:
             raise CampaignInvalidException("Invalid campaign object: null")
-        campaign.join_id = CampaignUtils.generate_join_id()
+        campaign.join_id = CampaignUtils.generate_join_id(campaign_provider=campaign_provider)
         campaign.owner = owner
 
-        created_campaign = MongoDbCampaignProvider.create(campaign)
+        created_campaign = campaign_provider.create(campaign)
 
-        created_collection = MongoDbCollectionProvider.create_by_campaign(
+        created_collection = collection_provider.create_by_campaign(
             user_id = str(owner), 
             collection = "maps", 
             campaign_id = str(created_campaign._id), 
@@ -35,19 +37,19 @@ class CampaignUtils:
         return created_campaign
 
     @staticmethod
-    def generate_join_id():
+    def generate_join_id(campaign_provider: MongoDbCampaignProvider):
         join_id = CampaignJoinIdGenerator.generate()
         numAttempts = 0
         while numAttempts < 5:
             try:
-                found = MongoDbCampaignProvider.get_by_join_id(join_id=join_id)
+                found = campaign_provider.get_by_join_id(join_id=join_id)
                 join_id = CampaignJoinIdGenerator.generate()
                 numAttempts += 1
             except CampaignNotFoundException:
                 return join_id
         raise Exception("Could not find a Join Id in a reasonable time. Try again later.")
 
-    def create_tutorial_campaign(owner):
+    def create_tutorial_campaign(campaign_provider: MongoDbCampaignProvider, collection_provider: MongoDbCollectionProvider, owner):
         campaign = Campaign(_id=None,
                             join_id=None,
                             owner=owner,
@@ -58,7 +60,7 @@ class CampaignUtils:
                             last_modified=datetime.datetime.now(),
                             image_url="/static/assets/tutorial/campaign-banner.jpg",
                             players=[])
-        campaign = MongoDbCampaignProvider.create(campaign)
+        campaign = campaign_provider.create(campaign)
 
         # Create characters
         characters = [
@@ -71,7 +73,7 @@ class CampaignUtils:
         ]
         created_characters = []
         for character in characters:
-            c = MongoDbCollectionProvider.create_by_campaign(
+            c = collection_provider.create_by_campaign(
                 str(owner),
                 "characters",
                 str(campaign._id),
@@ -87,7 +89,7 @@ class CampaignUtils:
             "Scale": 140,
             "start": {"n": 2, "w": 2, "s": 12, "e": 18}
         }
-        map1 = MongoDbCollectionProvider.create_by_campaign(str(owner), "maps", str(campaign._id), map1)
+        map1 = collection_provider.create_by_campaign(str(owner), "maps", str(campaign._id), map1)
 
         map2 = {
             "ImageUrl": "/static/assets/tutorial/drawing-tools-chat.jpg",
@@ -96,7 +98,7 @@ class CampaignUtils:
             "Scale": 140,
             "start": {"n": 2, "w": 2, "s": 12, "e": 18}
         }
-        map2 = MongoDbCollectionProvider.create_by_campaign(str(owner), "maps", str(campaign._id), map2)
+        map2 = collection_provider.create_by_campaign(str(owner), "maps", str(campaign._id), map2)
 
         map3 = {
             "ImageUrl": "/static/assets/tutorial/thank-you.jpg",
@@ -104,7 +106,7 @@ class CampaignUtils:
             "Height": 25,
             "Scale": 140
         }
-        map3 = MongoDbCollectionProvider.create_by_campaign(str(owner), "maps", str(campaign._id), map3)
+        map3 = collection_provider.create_by_campaign(str(owner), "maps", str(campaign._id), map3)
 
         # Create tokens
         tokens = [
@@ -122,14 +124,14 @@ class CampaignUtils:
             ("Tauren", "Ogre", "Ogre mauler", "circle", "#1ba73e", str(created_characters[4]["_id"]), map2["_id"], 28, 6, None, 3)
         ]
         for token in tokens:
-            MongoDbCollectionProvider.create_by_campaign(
+            collection_provider.create_by_campaign(
                 str(owner),
                 "characters",
                 str(campaign._id),
                 CharacterUtil.create_collection_token(token[0], token[1], token[2], token[3], token[4], token[5], token[6], token[7], token[8], token[9])
             )
         
-        MongoDbCollectionProvider.create_by_campaign(str(owner), "players", str(campaign._id), MapUtils.create_player(map1["_id"], owner))
+        collection_provider.create_by_campaign(str(owner), "players", str(campaign._id), MapUtils.create_player(map1["_id"], owner))
 
 class MapUtils:
     @staticmethod

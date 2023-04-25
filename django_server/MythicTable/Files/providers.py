@@ -5,15 +5,6 @@ import pymongo
 from bson import ObjectId
 from MythicTable.providers import MongoDbProvider
 
-client = pymongo.MongoClient('mongodb://admin:abc123!@localhost')
-for dbn in client.list_database_names():
-    print("db", dbn)
-    db = client[dbn]
-    for coll in db.list_collection_names():
-        print("coll", coll)
-db = client['admin']
-files_collection = db["files"]
-
 class MongoDbFileProvider(MongoDbProvider):
     def __init__(self, client=None, db_name=None):
         super().__init__(client, db_name)

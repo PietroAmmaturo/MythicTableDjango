@@ -18,16 +18,19 @@ class LocalFileStoreView(AuthorizedView):
 class FileProviderView(LocalFileStoreView):
     client = None
     db_name = None
-    def __init__(self, file_provider=None, client=None, db_name=None):
+    file_provider = None
+    profile_provider = None
+    def __init__(self, profile_provider=None, file_provider=None, client=None, db_name=None):
         super().__init__()
         self.client = client
         self.db_name = db_name
         self.file_provider = file_provider or MongoDbFileProvider(self.client, self.db_name)
+        self.profile_provider = profile_provider or MongoDbProfileProvider(self.client, self.db_name)
 
 class FileListView(FileProviderView):
     def get(self, request, path=None, format=None):
         user_id = request.session["userinfo"]["sub"]
-        profile_id = str(MongoDbProfileProvider.get_by_user_id(user_id=user_id)._id)
+        profile_id = str(self.profile_provider.get_by_user_id(user_id=user_id)._id)
         if path:
             files = self.file_provider.filter(profile_id=profile_id, file_filter=path)
         else:
@@ -37,7 +40,7 @@ class FileListView(FileProviderView):
     
     def post(self, request):
         user_id = request.session["userinfo"]["sub"]
-        profile_id = str(MongoDbProfileProvider.get_by_user_id(user_id=user_id)._id)
+        profile_id = str(self.profile_provider.get_by_user_id(user_id=user_id)._id)
         path = request.query_params.get('path')
         uploaded_files = request.FILES.getlist('files')
         size = sum([uploaded_file.size for uploaded_file in uploaded_files])
@@ -68,14 +71,14 @@ class FileListView(FileProviderView):
 class FileView(FileProviderView):
     def get(self, request, fileId=None, format=None):
         user_id = request.session["userinfo"]["sub"]
-        profile_id = str(MongoDbProfileProvider.get_by_user_id(user_id=user_id)._id)
+        profile_id = str(self.profile_provider.get_by_user_id(user_id=user_id)._id)
         file = self.file_provider.get(file_id=fileId, profile_id=profile_id)
         serializer = FileAPISerializer(file)
         return Response(serializer.data)
     
     def delete(self, request, fileId=list[str], format=None):
         user_id = request.session["userinfo"]["sub"]
-        profile_id = str(MongoDbProfileProvider.get_by_user_id(user_id=user_id)._id)
+        profile_id = str(self.profile_provider.get_by_user_id(user_id=user_id)._id)
         files_to_delete = []
         files_found = []
         for file_id in fileId:
