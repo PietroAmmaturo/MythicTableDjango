@@ -22,7 +22,11 @@ from Campaign.views import CampaignListView, CampaignView, CampaignJoinView, Cam
 from Collections.views import CollectionView, CollectionCampaignView, CollectionProfileView
 from Permissions.views import PermissionsView
 from Files.views import FileListView, FileView
+import pymongo
+
 router = DefaultRouter()
+
+client = pymongo.MongoClient(settings.MONGODB_HOST)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
@@ -48,7 +52,7 @@ urlpatterns = [
 
     path('api/[controller]/<str:campaignId>', PermissionsView.as_view()),
 
-    path('api/files', FileListView.as_view()),
-    path('api/files/<str:fileId>', FileView.as_view()),
+    path('api/files', FileListView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
+    path('api/files/<str:fileId>', FileView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
     
 ]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

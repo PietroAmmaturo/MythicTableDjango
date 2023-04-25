@@ -27,7 +27,11 @@ SECRET_KEY = 'e@1+z5b@nq#o9789q%_(@9@1+jy&1=@1x##q)zfyx@n$g8os41'
 
 # Add the directory path where you want to serve static files from
 MEDIA_URL = '/user-files/' 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'user-files/')  
+MEDIA_ROOT = os.path.join(BASE_DIR, 'user-files/') 
+
+#connection string
+MONGODB_HOST = 'mongodb://admin:abc123!@localhost'  # MongoDB connection host
+MONGODB_DB_NAME = 'admin'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
