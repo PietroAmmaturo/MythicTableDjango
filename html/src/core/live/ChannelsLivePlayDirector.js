@@ -33,15 +33,15 @@ class LivePlayDirector {
             Authorization: `Bearer ${accessToken}`,
         });
 
-        this.connection.listen('confirm_op_delta', this.onConfirmDelta.bind(this));
-        this.connection.listen('character_added', this.onCharacterAdded.bind(this));
-        this.connection.listen('character_removed', this.onCharacterRemoved.bind(this));
-        this.connection.listen('exception_raised', this.onExceptionRaised.bind(this));
-        this.connection.listen('message_received', this.onMessageReceived.bind(this));
-        this.connection.listen('object_updated', this.onObjectUpdated.bind(this));
-        this.connection.listen('object_added', this.onObjectAdded.bind(this));
-        this.connection.listen('object_removed', this.onObjectRemoved.bind(this));
-        this.connection.listen('line_drawn', this.onLineDrawn.bind(this));
+        this.connection.addEventListener('confirm_op_delta', this.onConfirmDelta.bind(this));
+        this.connection.addEventListener('character_added', this.onCharacterAdded.bind(this));
+        this.connection.addEventListener('character_removed', this.onCharacterRemoved.bind(this));
+        this.connection.addEventListener('exception_raised', this.onExceptionRaised.bind(this));
+        this.connection.addEventListener('message_received', this.onMessageReceived.bind(this));
+        this.connection.addEventListener('object_updated', this.onObjectUpdated.bind(this));
+        this.connection.addEventListener('object_added', this.onObjectAdded.bind(this));
+        this.connection.addEventListener('object_removed', this.onObjectRemoved.bind(this));
+        this.connection.addEventListener('line_drawn', this.onLineDrawn.bind(this));
 
         this.connection.socket.addEventListener('close', () => {
             // FIXME: PoC only; needs to be mutation if used in prod
@@ -166,7 +166,7 @@ class LivePlayDirector {
             type: 'draw_line',
             campaignId: this.sessionId,
             mapId: mapId,
-            item: line
+            item: line,
         });
     }
 

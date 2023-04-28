@@ -26,13 +26,23 @@ class CampaignProviderView(AuthorizedView):
         self.collection_provider = collection_provider or MongoDbCollectionProvider(self.client, self.db_name)
         self.profile_provider = profile_provider or MongoDbProfileProvider(self.client, self.db_name)
 
+    def get_current_user(self, request):
+        user_id = request.session["userinfo"]["sub"]
+        profile_id = str(self.profile_provider.get_by_user_id(user_id=user_id)._id)
+        serializer = PlayerAPISerializer(data=profile_id)
+        if not serializer.is_valid():
+            message = f"The profile id of user: '{user_id}' is not a valid player name: {serializer.errors}"
+            raise CampaignAddPlayerException(message)
+        player = serializer.create(serializer.validated_data)
+        return player
+
 class CampaignListView(CampaignProviderView):
     def get(self, request):
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(self.profile_provider.get_by_user_id(user_id=user_id)._id)
         campaigns = self.campaign_provider.get_all(profile_id=profile_id)
         serializer = CampaignAPISerializer(campaigns, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        return Response(serializer.data)
     
     def post(self, request):
         user_id = request.session["userinfo"]["sub"]
@@ -49,9 +59,10 @@ class CampaignListView(CampaignProviderView):
 class CampaignView(CampaignProviderView):
     @permission_classes([UserIsMemberOfCampaign])
     def get(self, request, campaignId=None):
+        print("retriving campaign")
         campaign = self.campaign_provider.get(campaignId)
         serializer = CampaignAPISerializer(campaign)
-        return JsonResponse(serializer.data)
+        return Response(serializer.data)
     
     @permission_classes([UserOwnsCampaign])
     def put(self, request, campaignId=None):
@@ -62,36 +73,36 @@ class CampaignView(CampaignProviderView):
             raise CampaignInvalidException(message)
         campaign = serializer.create(serializer.validated_data)
         serializer = CampaignAPISerializer(self.campaign_provider.update(campaignId, campaign))
-        return JsonResponse(serializer.data)
+        return Response(serializer.data)
     
     @permission_classes([UserOwnsCampaign])
     def delete(self, request, campaignId=None):
         campaign = self.campaign_provider.get(campaignId)
         self.campaign_provider.delete(campaignId)
         serializer = CampaignAPISerializer(campaign)
-        return JsonResponse(serializer.data)
+        return Response(serializer.data)
 
 class CampaignJoinView(CampaignProviderView):
     def get(self, request, joinId=None):
         campaign = self.campaign_provider.get_by_join_id(joinId)
         serializer = CampaignAPISerializer(campaign)
-        return JsonResponse(serializer.data)
+        return Response(serializer.data)
 
     def put(self, request, joinId=None):
         campaign = self.campaign_provider.get_by_join_id(joinId)
-        serializer = CampaignAPISerializer(self.campaign_provider.add_player(campaign._id, get_current_user(request)))
-        return JsonResponse(serializer.data)
+        serializer = CampaignAPISerializer(self.campaign_provider.add_player(campaign._id, self.get_current_user(request=request)))
+        return Response(serializer.data)
 
 class CampaignLeaveView(CampaignProviderView):
-    permission_classes = [UserIsMemberOfCampaign]
+    @permission_classes([UserIsMemberOfCampaign])
     def put(self, request, campaignId, playerId):
-        player = get_current_user()
+        player = self.get_current_user(request=request)
         campaign = self.campaign_provider.remove_player(campaignId, player)
         serializer = CampaignAPISerializer(campaign)
-        return JsonResponse(serializer.data)
+        return Response(serializer.data)
     
 class CampaignForceLeaveView(CampaignProviderView):
-    permission_classes = [UserOwnsCampaign]
+    @permission_classes([UserOwnsCampaign])
     def put(self, request, campaignId, playerId):
         campaign = self.campaign_provider.get(campaignId)
         player_data = {"name" : f"{playerId}"}
@@ -102,28 +113,18 @@ class CampaignForceLeaveView(CampaignProviderView):
         player = serializer.create(serializer.validated_data)
         campaign = self.campaign_provider.remove_player(campaignId, player)
         serializer = CampaignAPISerializer(campaign)
-        return JsonResponse(serializer.data)
+        return Response(serializer.data)
         
 class CampaignMessagesView(CampaignProviderView):
-    permission_classes = [UserIsMemberOfCampaign]
+    @permission_classes([UserIsMemberOfCampaign])
     def get(self, request, campaignId):
         messages = self.campaign_provider.get_messages(campaignId, request.query_params.get('pageSize', 50), request.query_params.get('page', 1))
         serializer = MessageAPISerializer(messages, many=True)
-        return JsonResponse(serializer.data)
+        return Response(serializer.data)
     
 class CampaignPlayersView(CampaignProviderView):
-    permission_classes = [UserIsMemberOfCampaign]
+    @permission_classes([UserIsMemberOfCampaign])
     def get(self, campaignId):
         players = self.campaign_provider.get_players(campaignId)
         serializer = MessageAPISerializer(players, many=True)
-        return JsonResponse(serializer.data)
-    
-def get_current_user(request):
-    user_id = request.session["userinfo"]["sub"]
-    profile_id = str(self.profile_provider.get_by_user_id(user_id=user_id)._id)
-    serializer = PlayerAPISerializer(data=profile_id)
-    if not serializer.is_valid():
-        message = f"The profile id of user: '{user_id}' is not a valid player name: {serializer.errors}"
-        raise CampaignAddPlayerException(message)
-    player = serializer.create(serializer.validated_data)
-    return player
+        return Response(serializer.data)

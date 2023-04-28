@@ -6,6 +6,7 @@ from MythicTable.views import AuthorizedView
 from Campaign.permissions import UserIsMemberOfCampaign
 from Campaign.providers import MongoDbCampaignProvider
 from Profile.providers import MongoDbProfileProvider
+from rest_framework.decorators import permission_classes
 
 class CollectionProviderView(AuthorizedView):
     client = None
@@ -54,14 +55,20 @@ class CollectionProfileView(CollectionProviderView):
         return Response(status=status.HTTP_400_BAD_REQUEST)
     
 class CollectionCampaignView(CollectionProviderView):
-    permission_classes = [UserIsMemberOfCampaign]
+    @permission_classes([UserIsMemberOfCampaign])
+    def get(self, request, collection, campaignId):
+        result = self.collection_provider.get_list_by_campaign(collection, str(campaignId))
+        return Response(result)
+    
+    @permission_classes([UserIsMemberOfCampaign])
     def put(self, request, collection, campaignId):
         patch = request.data
         result = self.collection_provider.update(collection, str(campaignId), patch)
         if result > 0:
             return Response(self.collection_provider.get(collection, str(campaignId)))
         return Response(status=status.HTTP_400_BAD_REQUEST)
-
+    
+    @permission_classes([UserIsMemberOfCampaign])
     def post(self, request, collection, campaignId):
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(self.profile_provider.get_by_user_id(user_id=user_id)._id)
@@ -71,7 +78,8 @@ class CollectionCampaignView(CollectionProviderView):
             return Response(data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+        
+    @permission_classes([UserIsMemberOfCampaign])
     def delete(self, request, collection, campaignId, itemId):
         try:
             data = self.collection_provider.delete_by_campaign(collection, str(campaignId), str(itemId))

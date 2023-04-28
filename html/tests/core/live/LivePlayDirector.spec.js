@@ -1,4 +1,4 @@
-import LivePlayDirector from '@/core/live/LivePlayDirector';
+import LivePlayDirector from '@/core/live/ChannelsLivePlayDirector';
 import GameStateStore from '@/store/GameStateStore';
 import LivePlayState from '@/core/live/LivePlayState';
 import Vuex from 'vuex';

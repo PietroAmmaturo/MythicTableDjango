@@ -23,13 +23,14 @@ class MongoDbCollectionProvider(MongoDbProvider):
         j_object['_id'] = str(result.inserted_id)
         return j_object
 
-    def get_list(self, user_id: str, collection_id: str) -> list[dict]:
+    def get_list(self, user_id: str, collection: str) -> list[dict]:
+        print("retriving collection", collection)
         bson_results = self.collection_collection.find(
-            {self.COLLECTION_FIELD: collection_id, self.USER_ID_FIELD: user_id}
+            {self.COLLECTION_FIELD: collection, self.USER_ID_FIELD: user_id}
         ).to_list(length=None)
         results = [self._bson_to_json(bson_result) for bson_result in bson_results]
         if not results:
-            message = f"Could not find collection '{collection_id}' for user '{user_id}'"
+            message = f"Could not find collection '{collection}' for user '{user_id}'"
             raise MythicTableException(message)
         return results
 
@@ -78,15 +79,17 @@ class MongoDbCollectionProvider(MongoDbProvider):
         a = self.collection_collection.find_one({"_id" : ObjectId(str(result.inserted_id))})
         return loads(dumps(bson))
 
-    def get_list_by_campaign(self, collection_id, campaign_id):
-        results = self.collection_collection.find({
-            self.COLLECTION_FIELD: collection_id,
+    def get_list_by_campaign(self, collection, campaign_id):
+        results = list(self.collection_collection.find({
+            self.COLLECTION_FIELD: collection,
             self.CAMPAIGN_FIELD: campaign_id
-        }).to_list(length=None)
+        }))
         if results:
+            for result in results:
+                result["_id"] = str(result["_id"])
             return [loads(dumps(result)) for result in results]
-        message = f"Could not find collection '{collection_id}' for campaign '{campaign_id}'"
-        raise MythicTableException(message)
+        message = f"Could not find collection '{collection}' for campaign '{campaign_id}'"
+        print(message)
         return []
 
     def get_by_campaign(self, collection_id, campaign_id, id):

@@ -152,7 +152,7 @@ class MessageDBSerializer(serializers.ModelSerializer):
 
 class MessageContainerDBSerializer(serializers.ModelSerializer):
     _id = ObjectIdDBField()
-    Messages = MessageDBSerializer(source='messages')
+    Messages = MessageDBSerializer(source='messages', many=True)
 
     class Meta:
         model = MessageContainer

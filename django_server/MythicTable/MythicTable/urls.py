@@ -23,7 +23,7 @@ from Collections.views import CollectionView, CollectionCampaignView, Collection
 from Permissions.views import PermissionsView
 from Files.views import FileListView, FileView
 import pymongo
-from . import consumers
+from .consumers import LivePlayConsumer
 from django.urls import re_path
 
 router = DefaultRouter()
@@ -47,10 +47,10 @@ urlpatterns = [
     path('api/campaigns/<str:campaignId>/leave', CampaignLeaveView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
     path('api/campaigns/<str:campaignId>/forceLeave/<str:playerId>', CampaignForceLeaveView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
 
-    path('api/collections/<str:collectionId>', CollectionView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)), 
-    path('api/campaigns/<str:collectionId>/id/<str:profileId>', CollectionProfileView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
-    path('api/campaigns/<str:collectionId>/campaign/<str:campaignId>', CollectionCampaignView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
-    path('api/campaigns/<str:collectionId>/campaign/<str:campaignId>/id/<str:itemId>', CollectionCampaignView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
+    path('api/collections/<str:collection>', CollectionView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)), 
+    path('api/collections/<str:collection>/id/<str:profileId>', CollectionProfileView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
+    path('api/collections/<str:collection>/campaign/<str:campaignId>', CollectionCampaignView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
+    path('api/collections/<str:collection>/campaign/<str:campaignId>/id/<str:itemId>', CollectionCampaignView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
 
     path('api/[controller]/<str:campaignId>', PermissionsView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
 
@@ -60,5 +60,5 @@ urlpatterns = [
 ]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 websocket_urlpatterns = [
-    re_path(r'ws/liveplay/$', consumers.LivePlayConsumer.as_asgi()),
+    re_path(r'ws/liveplay/$', LivePlayConsumer.as_asgi()),
 ]

@@ -50,6 +50,23 @@ class MongoDbCampaignProvider(MongoDbProvider):
             message = f"Unable to create campaign, result {result}"
             raise CampaignInvalidException(message)
         campaign._id = result.inserted_id
+
+        messages_data = []
+        message_serializer = MessageDBSerializer(data=messages_data, many=True)
+        if not message_serializer.is_valid():
+            message = f"Unable to create campaign messages, serialization errors: {message_container_serializer.errors}"
+            raise CampaignInvalidException(message)
+        
+        message_container_data = {"_id": campaign._id, "Messages": message_serializer.data}
+        message_container_serializer = MessageContainerDBSerializer(data=message_container_data)
+        if not message_container_serializer.is_valid():
+            message = f"Unable to create campaign message container, serialization errors: {message_container_serializer.errors}"
+            raise CampaignInvalidException(message)
+
+        result = self.campaign_messages_collection.insert_one(message_container_serializer.data)
+        if (not result.acknowledged):
+            message = f"Unable to create campaign messages, result: {result}"
+            raise CampaignInvalidException(message)
         return campaign
 
     def get_by_join_id(self, join_id: str):
@@ -142,7 +159,7 @@ class MongoDbCampaignProvider(MongoDbProvider):
             raise CampaignInvalidException(message)
         campaign_message_container = serializer.create(serializer.validated_data)
         messages = campaign_message_container.messages
-        initial_index = messages.len() - (page_size * page)
+        initial_index = len(messages) - (page_size * page)
         # If there are no messages in a page, return empty list
         if initial_index <= -page_size:
             return []

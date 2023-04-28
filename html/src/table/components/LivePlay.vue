@@ -101,7 +101,7 @@ import { mapState, mapActions } from 'vuex';
 
 import Header from '@/table/components/play-view/Header/Header.vue';
 
-import LivePlayDirector from '@/core/live/LivePlayDirector';
+import LivePlayDirector from '@/core/live/ChannelsLivePlayDirector';
 import Scene from '@/table/components/scene/Scene.vue';
 
 import Maps from '@/maps/components/Maps';

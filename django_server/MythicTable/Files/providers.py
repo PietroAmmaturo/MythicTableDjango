@@ -34,13 +34,13 @@ class MongoDbFileProvider(MongoDbProvider):
             raise FileStorageException(f"File '{file_id}' does not belong to user '{user_id}'")
         return file
 
-    def get_all(self, user_id: str) -> list[File]:
-        filter = {"user": user_id}
+    def get_all(self, profile_id: str) -> list[File]:
+        filter = {"user": profile_id}
         dtos = self.files_collection.find(filter)
         # Deserialization
-        serializer = FileDBSerializer(data=dtos, many = True)
+        serializer = FileDBSerializer(data=list(dtos), many = True)
         if not serializer.is_valid():
-            message = f"The one or more files of user: '{user_id}' stored in the DB are not valid; {serializer.errors}"
+            message = f"The one or more files of user: '{profile_id}' stored in the DB are not valid; {serializer.errors}"
             raise FileStorageException(message)
         files = serializer.create(serializer.validated_data)
         return files
@@ -51,7 +51,7 @@ class MongoDbFileProvider(MongoDbProvider):
             mongo_filter["path"] = file_filter
         dtos = self.files_collection.find(mongo_filter)
         # Deserialization
-        serializer = FileDBSerializer(data=dtos, many = True)
+        serializer = FileDBSerializer(data=list(dtos), many = True)
         if not serializer.is_valid():
             message = f"The one or more files of user: '{user_id}' stored in the DB are not valid; {serializer.errors}"
             raise FileStorageException(message)
