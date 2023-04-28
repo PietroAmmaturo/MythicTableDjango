@@ -32,19 +32,28 @@ def get_userinfo(token, userinfo_url):
 
 class AuthenticationBackend(BasicAuthentication):
     def authenticate(self, request):
-        # Get the JWT token from the Authorization header
-        auth_header = request.META.get('HTTP_AUTHORIZATION', '')
-        token = auth_header.split('Bearer ')[1]
-        jwks_url =  get_jwks_url("https://key.mythictable.com/auth/realms/MythicTable") # the issuer is not in the header of the token
-        decoded = decode_and_validate_token(token, jwks_url)
-        userinfo_url =  get_userinfo_url("https://key.mythictable.com/auth/realms/MythicTable") # the issuer is not in the header of the token
+        try:
+            # Get the JWT token from the Authorization header
+            auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+            token = auth_header.split('Bearer ')[1]
+        except:
+            print("wrong HTTP_AUTHORIZATION header", auth_header)
+            return None
+        try:
+            jwks_url =  get_jwks_url("https://key.mythictable.com/auth/realms/MythicTable") # the issuer is not in the header of the token
+            decoded = decode_and_validate_token(token, jwks_url)
+            userinfo_url =  get_userinfo_url("https://key.mythictable.com/auth/realms/MythicTable") # the issuer is not in the header of the token
+        except:
+            print("one or more wrong urls", jwks_url, userinfo_url)
+            return None
         userinfo = get_userinfo(token, userinfo_url)
         try:
             username=userinfo['sub']
             email=userinfo['email']
         except:
             print("wrong userinfo", userinfo)
-                # Create a new Django user object or retrieve an existing one
+            return None
+        # Create a new Django user object or retrieve an existing one
         User = get_user_model()
         # The django user does not have profile information but its username is the userid of the profile
         user, created = User.objects.get_or_create(username=username, email=email)

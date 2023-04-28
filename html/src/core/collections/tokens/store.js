@@ -29,7 +29,7 @@ export const mutations = {
 
 export const actions = {
     async spawn({ dispatch }, token) {
-        console.log("adding token")
+        console.log('adding token');
         return await dispatch(
             'collections/add',
             { collection: COLLECTION_TYPES.tokens, item: new Token(token) },
@@ -42,7 +42,7 @@ export const actions = {
      * @param {Token} param1
      */
     async remove({ dispatch }, { id }) {
-        console.log("removing token")
+        console.log('removing token');
         if (id) {
             return await dispatch('collections/remove', { collection: COLLECTION_TYPES.tokens, id }, { root: true });
         }
@@ -54,7 +54,7 @@ export const actions = {
      */
 
     async update({ getters, dispatch }, editedToken) {
-        console.log("updating token")
+        console.log('updating token');
         const currentToken = getters.getRawToken(editedToken._id);
         if (!currentToken) throw new Error(`Could not find Token to update with id '${editedToken._id}'`);
 
@@ -77,7 +77,7 @@ export const actions = {
      * @param {Token} movedToken
      */
     async moveToken(context, movedToken) {
-        console.log("moving token")
+        console.log('moving token');
         const currentToken = new Token(
             context.rootGetters['collections/getItem'](COLLECTION_TYPES.tokens, movedToken._id),
         );

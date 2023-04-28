@@ -23,6 +23,8 @@ from Collections.views import CollectionView, CollectionCampaignView, Collection
 from Permissions.views import PermissionsView
 from Files.views import FileListView, FileView
 import pymongo
+from . import consumers
+from django.urls import re_path
 
 router = DefaultRouter()
 
@@ -56,3 +58,7 @@ urlpatterns = [
     path('api/files/<str:fileId>', FileView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
     
 ]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+websocket_urlpatterns = [
+    re_path(r'ws/liveplay/$', consumers.LivePlayConsumer.as_asgi()),
+]
