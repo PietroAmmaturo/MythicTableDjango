@@ -64,7 +64,7 @@ class ProfileView(ProfileProviderView):
     API view for a single profile by ID.
     """
     def get(self, request, profileId=None, format=None):
-        profile = self.get(profileId)
+        profile = self.campaign_provider.get(profileId)
         serializer = ProfileAPISerializer(profile)
         return Response(serializer.data)
 

@@ -15,9 +15,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 import os
-TEMPLATE_DIRS = (
-    os.path.join(Path(__file__), '/myAuth'),
-)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -57,6 +54,7 @@ INSTALLED_APPS = [
     'Permissions',
     'Files',
     'channels',
+    'corsheaders',
 ]
 
 ASGI_APPLICATION = 'MythicTable.asgi.application'
@@ -163,6 +161,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 
 # useful endpoint https://key.mythictable.com/auth/realms/MythicTable/.well-known/openid-configuration
 # jwk endpoint https://key.mythictable.com/auth/realms/MythicTable/protocol/openid-connect/certs

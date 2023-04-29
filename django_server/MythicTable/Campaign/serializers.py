@@ -9,13 +9,23 @@ from MythicTable.serializers import ObjectIdAPIField, ObjectIdDBField, DateTimeD
 class PlayerAPISerializer(serializers.ModelSerializer):
     id = ObjectIdAPIField(default=None, allow_null=True,
                           required=False, source='_id')
-    name = serializers.CharField(
-        default=None, allow_blank=True, allow_null=True, required=False, source='name')
+    name = serializers.CharField()
 
     class Meta:
         model = Player
         fields = ('id', 'name')
 
+    def create(self, validated_data):
+        if isinstance(validated_data, list):
+            # If validated_data is a list, create an instance for each dictionary
+            return [self.create_instance(instance_data) for instance_data in validated_data]
+        else:
+            # If validated_data is not a list, create a single instance
+            return self.create_instance(validated_data)
+
+    def create_instance(self, instance_data):
+        campaign = Player(**instance_data)
+        return campaign
 
 class CampaignAPISerializer(serializers.ModelSerializer):
     id = ObjectIdAPIField(default=None, allow_null=True,
@@ -87,12 +97,12 @@ class MessageAPISerializer(serializers.ModelSerializer):
 #DB
 ########################
 class PlayerDBSerializer(serializers.ModelSerializer):
-    _id = ObjectIdDBField(source='_id')
+    _id = ObjectIdDBField()
     Name = serializers.CharField(source='name')
 
     class Meta:
         model = Player
-        fields = ('Id', 'Name')
+        fields = ('_id', 'Name')
 
 class CampaignDBSerializer(serializers.ModelSerializer):
     _id = ObjectIdDBField()

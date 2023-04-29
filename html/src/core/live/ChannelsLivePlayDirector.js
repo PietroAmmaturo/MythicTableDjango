@@ -27,42 +27,84 @@ class LivePlayDirector {
     async init() {
         console.log(this.store.state);
 
-        let accessToken = this.store.state.oidcStore.access_token;
         this.connection = new WebSocketBridge();
-        this.connection.connect(`ws://${window.location.host}/ws/liveplay/`, {
-            Authorization: `Bearer ${accessToken}`,
-        });
+        this.connection.addEventListener("message", (function (event) {
+            console.log("message recived", event.data);
+            switch (event.data.type) {
+                case 'websocket_accept':
+                    this.onWebsocketAccept(event);
+                    break;
+                case 'join_accept':
+                    this.onJoinAccept(event);
+                    break;
+                case 'join_refuse':
+                    this.onJoinRefuse(event);
+                    break;
+                case 'confirm_op_delta':
+                    this.onConfirmDelta(event);
+                    break;
+                case 'character_added':
+                    this.onCharacterAdded(event);
+                    break;
+                case 'character_removed':
+                    this.onCharacterRemoved(event);
+                    break;
+                case 'exception_raised':
+                    this.onExceptionRaised(event);
+                    break;
+                case 'message_received':
+                    this.onMessageReceived(event);
+                    break;
+                case 'object_updated':
+                    this.onObjectUpdated(event);
+                    break;
+                case 'object_added':
+                    this.onObjectAdded(event);
+                    break;
+                case 'object_removed':
+                    this.onObjectRemoved(event);
+                    break;
+                case 'line_drawn':
+                    this.onLineDrawn(event);
+                    break;
+                default:
+                    console.log('Unknown event type:', event.data.type);
+            }
+            
+        }).bind(this));
+    }
 
-        this.connection.addEventListener('confirm_op_delta', this.onConfirmDelta.bind(this));
-        this.connection.addEventListener('character_added', this.onCharacterAdded.bind(this));
-        this.connection.addEventListener('character_removed', this.onCharacterRemoved.bind(this));
-        this.connection.addEventListener('exception_raised', this.onExceptionRaised.bind(this));
-        this.connection.addEventListener('message_received', this.onMessageReceived.bind(this));
-        this.connection.addEventListener('object_updated', this.onObjectUpdated.bind(this));
-        this.connection.addEventListener('object_added', this.onObjectAdded.bind(this));
-        this.connection.addEventListener('object_removed', this.onObjectRemoved.bind(this));
-        this.connection.addEventListener('line_drawn', this.onLineDrawn.bind(this));
+    async onWebsocketAccept() {
+        console.log("accept ws")
+        this.state.connected = true; // FIXME: PoC only; needs to be mutation if used in prod
+        await this.connection.send({ type: 'join_session', sessionId: this.sessionId });
+    }
 
-        this.connection.socket.addEventListener('close', () => {
-            // FIXME: PoC only; needs to be mutation if used in prod
-            this.store.state.live.connected = false;
+
+    async onJoinAccept() {
+        await this.initializeEntities();
+    }
+
+    async onJoinRefuse() {
+        // Failed to join the session: might be unauthorized, or it might not exist
+        this.store.dispatch('errors/modal', {
+            message: 'Unable to join session.',
+            closeCallback: () => {
+                this.router.push({ path: '/campaign-list' });
+            },
         });
     }
 
     async connect() {
-        await this.connection.connect();
-        this.state.connected = true; // FIXME: PoC only; needs to be mutation if used in prod
-        let success = await this.connection.send({ type: 'join_session', sessionId: this.sessionId });
-        if (!success) {
-            // Failed to join the session: might be unauthorized, or it might not exist
-            this.store.dispatch('errors/modal', {
-                message: 'Unable to join session.',
-                closeCallback: () => {
-                    this.router.push({ path: '/campaign-list' });
-                },
-            });
-        }
-        await this.initializeEntities();
+        await this.connection.connect(`ws://127.0.0.1:5001/ws/liveplay/`, null, { 'Authorization': 'Bearer ' + this.store.state.oidcStore.access_token });
+        this.connection.socket.addEventListener('error', ((e) => {
+            console.log(e);
+        }));
+        this.connection.socket.addEventListener('close', (e) => {
+            // FIXME: PoC only; needs to be mutation if used in prod
+            this.store.state.live.connected = false;
+            console.log("WebSocket connection closed:", e.code, e.reason)
+        });
     }
 
     async disconnect() {

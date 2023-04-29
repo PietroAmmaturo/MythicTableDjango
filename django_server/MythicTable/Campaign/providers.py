@@ -120,6 +120,7 @@ class MongoDbCampaignProvider(MongoDbProvider):
         serializer = PlayerDBSerializer(player)
         new_player = serializer.data
         del new_player['_id']
+        new_player["_id"] = ObjectId()
         result = self.campaign_collection.update_one({"_id": ObjectId(campaign_id)}, {
             "$push": {"Players": new_player}})
         # if nothing has been modified

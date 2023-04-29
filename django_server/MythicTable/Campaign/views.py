@@ -29,7 +29,8 @@ class CampaignProviderView(AuthorizedView):
     def get_current_user(self, request):
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(self.profile_provider.get_by_user_id(user_id=user_id)._id)
-        serializer = PlayerAPISerializer(data=profile_id)
+        data = {"id":None, "name":profile_id}
+        serializer = PlayerAPISerializer(data=data)
         if not serializer.is_valid():
             message = f"The profile id of user: '{user_id}' is not a valid player name: {serializer.errors}"
             raise CampaignAddPlayerException(message)
