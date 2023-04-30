@@ -28,14 +28,14 @@ class MongoDbProfileProvider(MongoDbProvider):
         return profile
 
     # get using the mongoDB Object id
-    def get(self, _id: ObjectId):
+    def get(self, profile_id: str):
         # Define the filter
-        filter = {"_id": _id}
+        filter = {"_id": ObjectId(profile_id)}
         cursor = self.profile_collection.find({})
         # Find the first document that matches the filter
         dto = self.profile_collection.find_one(filter)
         if dto is None:
-            message = f"Cannot find user: {_id}"
+            message = f"Cannot find user: {profile_id}"
             raise ProfileNotFoundException(message)
         # Deserialization
         serializer = ProfileDBSerializer(data=dto)
@@ -45,7 +45,7 @@ class MongoDbProfileProvider(MongoDbProvider):
 
     
     # get all the profile objects
-    def get(self, _ids: list[ObjectId]):
+    def get_list(self, _ids: list[ObjectId]):
         profiles = []
         for _id in _ids:
             # Define the filter

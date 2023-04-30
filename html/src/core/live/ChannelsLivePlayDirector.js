@@ -28,58 +28,59 @@ class LivePlayDirector {
         console.log(this.store.state);
 
         this.connection = new WebSocketBridge();
-        this.connection.addEventListener("message", (function (event) {
-            console.log("message recived", event.data);
-            switch (event.data.type) {
-                case 'websocket_accept':
-                    this.onWebsocketAccept(event);
-                    break;
-                case 'join_accept':
-                    this.onJoinAccept(event);
-                    break;
-                case 'join_refuse':
-                    this.onJoinRefuse(event);
-                    break;
-                case 'confirm_op_delta':
-                    this.onConfirmDelta(event);
-                    break;
-                case 'character_added':
-                    this.onCharacterAdded(event);
-                    break;
-                case 'character_removed':
-                    this.onCharacterRemoved(event);
-                    break;
-                case 'exception_raised':
-                    this.onExceptionRaised(event);
-                    break;
-                case 'message_received':
-                    this.onMessageReceived(event);
-                    break;
-                case 'object_updated':
-                    this.onObjectUpdated(event);
-                    break;
-                case 'object_added':
-                    this.onObjectAdded(event);
-                    break;
-                case 'object_removed':
-                    this.onObjectRemoved(event);
-                    break;
-                case 'line_drawn':
-                    this.onLineDrawn(event);
-                    break;
-                default:
-                    console.log('Unknown event type:', event.data.type);
-            }
-            
-        }).bind(this));
+        this.connection.addEventListener(
+            'message',
+            function(event) {
+                console.log('message recived', event.data);
+                switch (event.data.type) {
+                    case 'websocket_accept':
+                        this.onWebsocketAccept(event);
+                        break;
+                    case 'join_accept':
+                        this.onJoinAccept(event);
+                        break;
+                    case 'join_refuse':
+                        this.onJoinRefuse(event);
+                        break;
+                    case 'confirm_op_delta':
+                        this.onConfirmDelta(event);
+                        break;
+                    case 'character_added':
+                        this.onCharacterAdded(event);
+                        break;
+                    case 'character_removed':
+                        this.onCharacterRemoved(event);
+                        break;
+                    case 'exception_raised':
+                        this.onExceptionRaised(event);
+                        break;
+                    case 'message_received':
+                        this.onMessageReceived(event);
+                        break;
+                    case 'object_updated':
+                        this.onObjectUpdated(event);
+                        break;
+                    case 'object_added':
+                        this.onObjectAdded(event);
+                        break;
+                    case 'object_removed':
+                        this.onObjectRemoved(event);
+                        break;
+                    case 'line_drawn':
+                        this.onLineDrawn(event);
+                        break;
+                    default:
+                        console.log('Unknown event type:', event.data.type);
+                }
+            }.bind(this),
+        );
     }
 
     async onWebsocketAccept() {
-        console.log("accept ws")
+        console.log('accept ws');
         this.state.connected = true; // FIXME: PoC only; needs to be mutation if used in prod
         await this.connection.send({ type: 'join_session', sessionId: this.sessionId });
     }
-
 
     async onJoinAccept() {
         await this.initializeEntities();
@@ -96,14 +97,16 @@ class LivePlayDirector {
     }
 
     async connect() {
-        await this.connection.connect(`ws://127.0.0.1:5001/ws/liveplay/`, null, { 'Authorization': 'Bearer ' + this.store.state.oidcStore.access_token });
-        this.connection.socket.addEventListener('error', ((e) => {
+        await this.connection.connect(`ws://127.0.0.1:5001/ws/liveplay/`, null, {
+            Authorization: 'Bearer ' + this.store.state.oidcStore.access_token,
+        });
+        this.connection.socket.addEventListener('error', e => {
             console.log(e);
-        }));
-        this.connection.socket.addEventListener('close', (e) => {
+        });
+        this.connection.socket.addEventListener('close', e => {
             // FIXME: PoC only; needs to be mutation if used in prod
             this.store.state.live.connected = false;
-            console.log("WebSocket connection closed:", e.code, e.reason)
+            console.log('WebSocket connection closed:', e.code, e.reason);
         });
     }
 

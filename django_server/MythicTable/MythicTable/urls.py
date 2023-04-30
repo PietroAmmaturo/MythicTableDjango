@@ -37,7 +37,7 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/profiles/me', MeView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
     path('api/profiles/<str:profileId>', ProfileView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
-    path('api/profiles', ProfileListView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
+    path('api/profiles/', ProfileListView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
 
     path('api/campaigns', CampaignListView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
     path('api/campaigns/join/<str:joinId>', CampaignJoinView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),

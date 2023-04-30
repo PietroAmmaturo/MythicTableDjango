@@ -64,17 +64,20 @@ class ProfileView(ProfileProviderView):
     API view for a single profile by ID.
     """
     def get(self, request, profileId=None, format=None):
-        profile = self.campaign_provider.get(profileId)
+        profile = self.profile_provider.get(profile_id=str(profileId))
         serializer = ProfileAPISerializer(profile)
         return Response(serializer.data)
 
 class ProfileListView(ProfileProviderView):
     def get(self, request):
         # userId is mandatory even if thoose are actually profile Id
-        profileIds = request.query_params.getlist('userId')
-        profiles = self.get(profileIds)
-        serializer = ProfileAPISerializer(profiles, many=True)
-        return Response(serializer.data)
+        if bool(request.query_params):
+            profileIds = request.query_params.getlist('userId')
+            profiles = self.get(profileIds)
+            serializer = ProfileAPISerializer(profiles, many=True)
+            return Response(serializer.data)
+        else:
+            return Response([])
     
     def put(self, request):
         user_id = request.session["userinfo"]["sub"]
