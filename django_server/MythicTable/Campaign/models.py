@@ -13,14 +13,14 @@ class Message(models.Model):
                  session_id: str, message: str, result: Chat, client_id: str,
                  context: dict[str, object]):
         self._id: ObjectId = _id
-        self.Timestamp: int = timestamp
-        self.UserId: str = user_id
-        self.DisplayName: str = display_name
-        self.SessionId: str = session_id
-        self.Message: str = message
-        self.Result: Chat = result
-        self.ClientId: str = client_id
-        self.Context: dict[str, object] = context
+        self.timestamp: int = timestamp
+        self.userId: str = user_id
+        self.displayName: str = display_name
+        self.sessionId: str = session_id
+        self.message: str = message
+        self.result: Chat = result
+        self.client_id: str = client_id
+        self.context: dict[str, object] = context
 
     def __eq__(self, other):
         if not isinstance(other, Message):

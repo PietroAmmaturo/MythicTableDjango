@@ -1,3 +1,4 @@
+from Textparsing.serializers import ChatDBSerializer
 from rest_framework import serializers
 from .models import Campaign, Player, Message, MessageContainer
 from django.utils import timezone
@@ -66,19 +67,19 @@ class CampaignAPISerializer(serializers.ModelSerializer):
         return campaign
 
 class MessageAPISerializer(serializers.ModelSerializer):
-    id = ObjectIdAPIField(default=None, allow_null=True,
-                          required=False, source='_id')
-    sender = serializers.CharField(
-        allow_blank=True, allow_null=True, required=False)
-    receiver = serializers.CharField(
-        allow_blank=True, allow_null=True, required=False)
-    content = serializers.CharField()
-    timestamp = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", input_formats=[
-                                          '%m/%d/%Y %H:%M:%Sv %Z', '%m/%d/%Y %H:%M:%Sv', '%m/%d/%Y %H:%M', '%m/%d/%Y %H:%M:%S', '%m/%d/%Y', '%Y-%m-%d %H:%M:%S'])
+    _id = serializers.CharField(source='_id')
+    timestamp = serializers.IntegerField(source='timestamp')
+    userId = serializers.CharField(source='user_id')
+    displayName = serializers.CharField(source='display_name')
+    sessionId = serializers.CharField(source='session_id')
+    message = serializers.CharField(source='message')
+    result = ChatDBSerializer(source='result')
+    clientId = serializers.CharField(source='client_id')
+    context = serializers.DictField(source='context')
 
     class Meta:
         model = Message
-        fields = ('id', 'sender', 'receiver', 'content', 'timestamp')
+        fields = ('_id', 'timestamp', 'userId', 'displayName', 'sessionId', 'message', 'result', 'clientId', 'context')
 
     def create(self, validated_data):
         if isinstance(validated_data, list):
@@ -137,15 +138,19 @@ class CampaignDBSerializer(serializers.ModelSerializer):
         return campaign
 
 class MessageDBSerializer(serializers.ModelSerializer):
-    _id = ObjectIdDBField()
-    Sender = serializers.CharField(source='sender')
-    Receiver = serializers.CharField(source='receiver')
-    Content = serializers.CharField(source='content')
-    Timestamp = DateTimeDBField(source='timestamp')
+    _id = serializers.CharField(source='_id')
+    Timestamp = serializers.IntegerField(source='timestamp')
+    UserId = serializers.CharField(source='user_id')
+    DisplayName = serializers.CharField(source='display_name')
+    SessionId = serializers.CharField(source='session_id')
+    Message = serializers.CharField(source='message')
+    Result = ChatDBSerializer(source='result')
+    ClientId = serializers.CharField(source='client_id')
+    Context = serializers.DictField(source='context')
 
     class Meta:
         model = Message
-        fields = ('_id', 'Sender', 'Receiver', 'Content', 'Timestamp')
+        fields = ('_id', 'Timestamp', 'UserId', 'DisplayName', 'SessionId', 'Message', 'Result', 'ClientId', 'Context')
 
     def create(self, validated_data):
         if isinstance(validated_data, list):

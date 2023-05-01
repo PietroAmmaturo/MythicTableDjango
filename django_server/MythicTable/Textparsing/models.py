@@ -1,31 +1,40 @@
-class Chat:
-    def __init__(self, message="", description="", elements=[], dice=[]):
-        self.Message = message
-        self.Description = description
-        self.Elements = elements
-        self.Dice = dice
 
+import json
 
-class Dice:
-    def __init__(self, element=None):
-        if element:
-            self.Result = element.Results.Value
-            self.Formula = element.Results.Expression
-            self.Rolls = [Die(dr.NumSides, dr.Value) for dr in element.Results.Values if dr.NumSides > 0]
-        else:
-            self.Result = 0.0
-            self.Formula = ""
-            self.Rolls = []
+from django.db import models
 
+class Chat(models.Model):
+    def __init__(self):
+        self.message: str = ""
+        self.description: str = ""
+        self.elements: list[Element] = []
+        self.dice: list[Dice] = []
 
-class Die:
-    def __init__(self, die=0, value=0.0):
-        self.Die = die
-        self.Value = value
+class Dice(models.Model):
+    def __init__(self):
+        self.result: float = 0
+        self.formula: str = ""
+        self.rolls: list[Die] = []
 
+    def __init__(self, element):
+        self.result = element['results'].Value
+        self.formula = element['results'].Expression
+        self.rolls = [Die(dr.NumSides, dr.Value) for dr in element['results'].Values if dr.NumSides > 0]
 
-class Element:
-    def __init__(self, error="", text="", results=None):
-        self.Error = error
-        self.Text = text
-        self.Results = Dice(results) if results else None
+class Die(models.Model):
+    def __init__(self, die: int, value: float):
+        self.die = die
+        self.value = value
+
+class Element(models.Model):
+    def __init__(self):
+        self.error: str = ""
+        self.text: str = ""
+        self.results: Dice = None
+
+    def __init__(self, result):
+        self.error = result.get("Error", "")
+        self.text = result.get("Text", "")
+        if result.get("Results") is not None:
+            self.Results = Dice(result)
+

@@ -169,8 +169,9 @@ class LivePlayDirector {
     }
 
     async tryRollDice(diceObject) {
+        const request = { campaignId: this.sessionId, diceObject: diceObject };
         //TODO Check for valid diceObject
-        this.connection.send({ type: 'roll_dice', request: diceObject });
+        this.connection.send({ type: 'roll_dice', request });
     }
 
     onMessageReceived(message) {
