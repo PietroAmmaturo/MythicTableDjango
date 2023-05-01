@@ -67,19 +67,20 @@ class CampaignAPISerializer(serializers.ModelSerializer):
         return campaign
 
 class MessageAPISerializer(serializers.ModelSerializer):
-    _id = serializers.CharField(source='_id')
-    timestamp = serializers.IntegerField(source='timestamp')
+    id = ObjectIdAPIField(default=None, allow_null=True,
+                          required=False, source='_id')
+    timestamp = serializers.IntegerField()
     userId = serializers.CharField(source='user_id')
     displayName = serializers.CharField(source='display_name')
     sessionId = serializers.CharField(source='session_id')
-    message = serializers.CharField(source='message')
-    result = ChatDBSerializer(source='result')
+    message = serializers.CharField()
+    result = ChatDBSerializer()
     clientId = serializers.CharField(source='client_id')
-    context = serializers.DictField(source='context')
+    context = serializers.DictField()
 
     class Meta:
         model = Message
-        fields = ('_id', 'timestamp', 'userId', 'displayName', 'sessionId', 'message', 'result', 'clientId', 'context')
+        fields = ('id', 'timestamp', 'userId', 'displayName', 'sessionId', 'message', 'result', 'clientId', 'context')
 
     def create(self, validated_data):
         if isinstance(validated_data, list):
@@ -138,7 +139,7 @@ class CampaignDBSerializer(serializers.ModelSerializer):
         return campaign
 
 class MessageDBSerializer(serializers.ModelSerializer):
-    _id = serializers.CharField(source='_id')
+    _id = ObjectIdAPIField()
     Timestamp = serializers.IntegerField(source='timestamp')
     UserId = serializers.CharField(source='user_id')
     DisplayName = serializers.CharField(source='display_name')

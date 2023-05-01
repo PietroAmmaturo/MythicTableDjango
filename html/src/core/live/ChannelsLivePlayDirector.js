@@ -12,7 +12,6 @@ class LivePlayDirector {
         this.msgsSinceLastPage = 0;
         store.commit('live/setDirector', this);
     }
-
     get sessionId() {
         return this.state.sessionId;
     }
@@ -78,8 +77,9 @@ class LivePlayDirector {
 
     async onWebsocketAccept() {
         console.log('accept ws');
+        const request = { campaignId: this.sessionId };
         this.state.connected = true; // FIXME: PoC only; needs to be mutation if used in prod
-        await this.connection.send({ type: 'join_session', sessionId: this.sessionId });
+        await this.connection.send({ type: 'join_session', request });
     }
 
     async onJoinAccept() {
@@ -97,8 +97,9 @@ class LivePlayDirector {
     }
 
     async connect() {
-        await this.connection.connect(`ws://127.0.0.1:5001/ws/liveplay/`, null, {
-            Authorization: 'Bearer ' + this.store.state.oidcStore.access_token,
+        let token = this.store.state.oidcStore.access_token
+        await this.connection.connect(`ws://127.0.0.1:5001/ws/liveplay/?access_token=${this.store.state.oidcStore.access_token}`, null, {
+            debug: true, // enables debug output
         });
         this.connection.socket.addEventListener('error', e => {
             console.log(e);

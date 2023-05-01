@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'Textparsing',
     'channels',
     'corsheaders',
+    'asgiref'
 ]
 
 ASGI_APPLICATION = 'MythicTable.asgi.application'
@@ -64,7 +65,15 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels.layers.InMemoryChannelLayer"
     }
 }
-
+ASGI_APPLICATION_OPTIONS = {
+    "websocket": {
+        "http_headers": [
+            ("Access-Control-Allow-Headers", "authorization, content-type"),
+            ("Access-Control-Expose-Headers", "authorization"),
+        ],
+        "access_control_allow_headers": "authorization, content-type",
+    }
+}
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

@@ -31,13 +31,12 @@ def get_userinfo(token, userinfo_url):
     return requests.get(userinfo_url, headers={"Authorization": f"Bearer {token}"}).json()
 
 class AuthenticationBackend(BasicAuthentication):
-    def authenticate(self, request):
+    def authenticate(self, request=None, scope=None):
         try:
             # Get the JWT token from the Authorization header
-            auth_header = request.META.get('HTTP_AUTHORIZATION', '')
-            token = auth_header.split('Bearer ')[1]
+            token = scope['query_string'].decode().split('access_token=')[1] if scope else request.META.get('HTTP_AUTHORIZATION', '').split('Bearer ')[1]
         except:
-            print("wrong HTTP_AUTHORIZATION header", auth_header)
+            print("wrong http header or websocket query_string, token retrived:", token)
             return None
         try:
             jwks_url =  get_jwks_url("https://key.mythictable.com/auth/realms/MythicTable") # the issuer is not in the header of the token
@@ -61,7 +60,11 @@ class AuthenticationBackend(BasicAuthentication):
             user.username = userinfo['sub']
             user.email = userinfo['email']
             user.save()
+        if scope:
         # Set the userinfo as a custom attribute of the request object
-        request.session["userinfo"] = userinfo
-        return [user, None]
+            scope['session']["userinfo"] = userinfo
+            return (user, None)
+        else:
+            request.session["userinfo"] = userinfo
+            return [user, None]
 
