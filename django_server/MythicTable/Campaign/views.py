@@ -119,7 +119,7 @@ class CampaignForceLeaveView(CampaignProviderView):
 class CampaignMessagesView(CampaignProviderView):
     @permission_classes([UserIsMemberOfCampaign])
     def get(self, request, campaignId):
-        messages = self.campaign_provider.get_messages(campaignId, request.query_params.get('pageSize', 50), request.query_params.get('page', 1))
+        messages = self.campaign_provider.get_messages(campaignId, int(request.query_params.get('pageSize', 50)), int(request.query_params.get('page', 1)))
         serializer = MessageAPISerializer(messages, many=True)
         return Response(serializer.data)
     

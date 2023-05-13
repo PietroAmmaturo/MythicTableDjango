@@ -9,7 +9,7 @@ class ProfileAPISerializer(serializers.ModelSerializer):
     imageUrl = serializers.CharField(source='image_url')
     hasSeenFPSplash = serializers.BooleanField(source='has_seen_FP_splash')
     hasSeenKSSplash = serializers.BooleanField(source='has_seen_KS_splash')
-    groups = serializers.CharField()
+    groups = serializers.ListField(child=serializers.CharField())
 
     # specify model and fields
     class Meta:

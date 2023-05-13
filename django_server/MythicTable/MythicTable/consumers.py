@@ -79,6 +79,11 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
         print('handle_join_session', data)
         group_name = data['request']['campaignId']
         await self.channel_layer.group_add(group_name, self.channel_name)
+        message = {
+            "type": "join_accept",
+            "message": "This is a reply from the server."
+        }
+        await self.send(text_data=json.dumps(message))
 
     async def handle_add_character(self, data):
         print('handle_add_character', data)
@@ -93,17 +98,17 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
 
         serializer = MessageAPISerializer(data = data['request']['diceObject'])
         if serializer.is_valid():
-            message = serializer.create_instance(serializer.data)
-            print(f"Dice Roll - User: {message.user_id} Roll: {message.message} Results: {message.result.dice} Message: {message.result.message}")
+            message = serializer.create(serializer.validated_data)
             campaign_id = message.session_id
-            print("---Sending Message", message)
-            await self.campaign_provider.add_message(campaign_id, message)
+            print("---Sending Message", data)
+            sent_message = self.campaign_provider.add_message(campaign_id, message)
+            serializer = MessageAPISerializer(sent_message)
             # Send the message to the group
             await self.channel_layer.group_send(
                 group_name,
                 {
                     "type": "message_received",
-                    "message": message
+                    "message": serializer.data
                 }
             )
             return True

@@ -166,7 +166,7 @@ class MongoDbCampaignProvider(MongoDbProvider):
             return []
         elif initial_index < 0:
             initial_index = 0
-            page_size = messages.len() % page_size
+            page_size = len(messages) % page_size
         messages = messages[initial_index: initial_index + page_size]
         return messages
 
@@ -176,6 +176,7 @@ class MongoDbCampaignProvider(MongoDbProvider):
         serializer = MessageDBSerializer(message)
         new_message = serializer.data
         del new_message['_id']
+        new_message['_id'] = ObjectId() #Creating it here because mongo will not create it for an array element
         result = self.campaign_messages_collection.update_one({"_id": ObjectId(campaign_id)}, {
             "$push": {"Messages": new_message}})
         # if nothing has been modified

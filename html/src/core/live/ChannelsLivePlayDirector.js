@@ -97,10 +97,13 @@ class LivePlayDirector {
     }
 
     async connect() {
-        let token = this.store.state.oidcStore.access_token
-        await this.connection.connect(`ws://127.0.0.1:5001/ws/liveplay/?access_token=${this.store.state.oidcStore.access_token}`, null, {
-            debug: true, // enables debug output
-        });
+        await this.connection.connect(
+            `ws://127.0.0.1:5001/ws/liveplay/?access_token=${this.store.state.oidcStore.access_token}`,
+            null,
+            {
+                debug: true, // enables debug output
+            },
+        );
         this.connection.socket.addEventListener('error', e => {
             console.log(e);
         });
@@ -126,6 +129,7 @@ class LivePlayDirector {
                     patch.push({ op: 'add', path: '/global/rollLog/-', value: roll });
                 });
                 this.store.dispatch('gamestate/applyDelta', patch);
+                console.log("mess", response)
             })
             .catch(error => {
                 console.error(error);

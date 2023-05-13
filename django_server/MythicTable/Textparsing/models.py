@@ -3,23 +3,16 @@ import json
 
 from django.db import models
 
-class Chat(models.Model):
-    def __init__(self):
-        self.message: str = ""
-        self.description: str = ""
-        self.elements: list[Element] = []
-        self.dice: list[Dice] = []
-
 class Dice(models.Model):
-    def __init__(self):
-        self.result: float = 0
-        self.formula: str = ""
-        self.rolls: list[Die] = []
-
-    def __init__(self, element):
-        self.result = element['results'].Value
-        self.formula = element['results'].Expression
-        self.rolls = [Die(dr.NumSides, dr.Value) for dr in element['results'].Values if dr.NumSides > 0]
+    def __init__(self, element=None):
+        if element:
+            self.result = element['results'].Value
+            self.formula = element['results'].Expression
+            self.rolls = [Die(dr.NumSides, dr.Value) for dr in element['results'].Values if dr.NumSides > 0]
+        else:
+            self.result = 0
+            self.formula = ""
+            self.rolls = []
 
 class Die(models.Model):
     def __init__(self, die: int, value: float):
@@ -27,14 +20,17 @@ class Die(models.Model):
         self.value = value
 
 class Element(models.Model):
-    def __init__(self):
-        self.error: str = ""
-        self.text: str = ""
-        self.results: Dice = None
+    def __init__(self, error="", text="", results=None):
+            self.error: str = error
+            self.text: str = text
+            self.results: Dice = results
+            
+    def __str__(self):
+        return f"Element(error={self.error}, text={self.text}, results={self.results})"
 
-    def __init__(self, result):
-        self.error = result.get("Error", "")
-        self.text = result.get("Text", "")
-        if result.get("Results") is not None:
-            self.Results = Dice(result)
-
+class Chat(models.Model):
+    def __init__(self, message: str = "", description: str = "", elements: list[Element] = [], dice: list[Dice] = []):
+        self.message = message
+        self.description = description
+        self.elements = elements
+        self.dice = dice

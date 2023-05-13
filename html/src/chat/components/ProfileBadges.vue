@@ -39,6 +39,7 @@ export default {
             return null;
         },
         validGroups(groups) {
+            console.log(groups)
             if (!groups) {
                 return [];
             }

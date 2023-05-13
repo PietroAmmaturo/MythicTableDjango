@@ -14,9 +14,9 @@ class Message(models.Model):
                  context: dict[str, object]):
         self._id: ObjectId = _id
         self.timestamp: int = timestamp
-        self.userId: str = user_id
-        self.displayName: str = display_name
-        self.sessionId: str = session_id
+        self.user_id: str = user_id
+        self.display_name: str = display_name
+        self.session_id: str = session_id
         self.message: str = message
         self.result: Chat = result
         self.client_id: str = client_id

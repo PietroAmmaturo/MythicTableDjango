@@ -1,4 +1,5 @@
-from Textparsing.serializers import ChatDBSerializer
+from Textparsing.serializers import ChatDBSerializer, ChatAPISerializer
+from Textparsing.models import Chat, Element
 from rest_framework import serializers
 from .models import Campaign, Player, Message, MessageContainer
 from django.utils import timezone
@@ -67,16 +68,15 @@ class CampaignAPISerializer(serializers.ModelSerializer):
         return campaign
 
 class MessageAPISerializer(serializers.ModelSerializer):
-    id = ObjectIdAPIField(default=None, allow_null=True,
-                          required=False, source='_id')
+    id = ObjectIdAPIField(default=None, allow_null=True, required=False, source='_id')
     timestamp = serializers.IntegerField()
     userId = serializers.CharField(source='user_id')
     displayName = serializers.CharField(source='display_name')
     sessionId = serializers.CharField(source='session_id')
     message = serializers.CharField()
-    result = ChatDBSerializer()
-    clientId = serializers.CharField(source='client_id')
-    context = serializers.DictField()
+    result = ChatAPISerializer(allow_null=True, required=False) #None in case of normal message
+    clientId = serializers.CharField(source='client_id',default=None, allow_null=True, required=False)
+    context = serializers.DictField(default=None, allow_null=True, required=False)
 
     class Meta:
         model = Message
@@ -93,6 +93,10 @@ class MessageAPISerializer(serializers.ModelSerializer):
     def create_instance(self, instance_data):
         if 'timestamp' not in instance_data or not instance_data['timestamp']:
             instance_data['timestamp'] = timezone.now()
+        if 'result' not in instance_data or not instance_data['result']:
+            elements=[Element(text=instance_data["message"])]
+            print(elements)
+            instance_data['result'] = Chat(message=instance_data['message'], elements=elements)
         message = Message(**instance_data)
         return message
 ########################
@@ -146,8 +150,8 @@ class MessageDBSerializer(serializers.ModelSerializer):
     SessionId = serializers.CharField(source='session_id')
     Message = serializers.CharField(source='message')
     Result = ChatDBSerializer(source='result')
-    ClientId = serializers.CharField(source='client_id')
-    Context = serializers.DictField(source='context')
+    ClientId = serializers.CharField(source='client_id', default=None, allow_null=True, required=False)
+    Context = serializers.DictField(source='context', default=None, allow_null=True, required=False)
 
     class Meta:
         model = Message

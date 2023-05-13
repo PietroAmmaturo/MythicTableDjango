@@ -28,7 +28,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'user-files/')
 
 #connection string
 MONGODB_HOST = 'mongodb://admin:abc123!@localhost'  # MongoDB connection host
-MONGODB_DB_NAME = 'admin'
+MONGODB_DB_NAME = 'MythicTableDjango'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
