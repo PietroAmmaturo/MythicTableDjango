@@ -28,7 +28,7 @@ class CampaignUtils:
         created_campaign = campaign_provider.create(campaign)
 
         created_collection = collection_provider.create_by_campaign(
-            user_id = str(owner), 
+            profile_id = str(owner), 
             collection = "maps", 
             campaign_id = str(created_campaign._id), 
             j_object = MapUtils.create_map("/static/assets/tutorial/thank-you.jpg", 37, 25, 140)

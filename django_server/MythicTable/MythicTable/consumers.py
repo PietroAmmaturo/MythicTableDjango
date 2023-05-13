@@ -116,13 +116,32 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
 
     async def handle_update_object(self, data):
         print('handle_update_object', data)
+        group_name = data['payload']['campaignId']
+        profile_id = str(self.profile_provider.get_by_user_id(self.scope["session"]["userinfo"]["sub"])._id)
+        campaign_id = data['payload']['campaignId']
+        item_id = data['payload']['id']
+        collection = data['payload']['collection']
+        patch = data['payload']['patch']
+        await self.validate_campaign_member(data['payload']['campaignId'])
 
+        if not self.permission_provider.is_authorized(user_id=profile_id, campaign_id=campaign_id, object_id=item_id):
+            raise UnauthorizedException(f"UpdateCollectionHubParameters failed User: {profile_id}, Campaign: {campaign_id}, Object {item_id}")
+        item = self.collection_provider.update_by_campaign(collection=collection, campaign_id=campaign_id, item_id=item_id, patch=patch)
+        # Send the message to the group
+        await self.channel_layer.group_send(
+            group_name,
+            {
+                "type": "object_updated",
+                "parameters": data['payload'],
+            }
+        )
+        return True
     async def handle_add_collection_item(self, data):
         print('handle_add_collection_item', data)
         group_name = data['campaignId']
         await self.validate_campaign_member(data['campaignId'])
 
-        item = self.collection_provider.create_by_campaign(user_id=str(self.profile_provider.get_by_user_id(self.scope["session"]["userinfo"]["sub"])._id), collection=data['collection'], campaign_id=data['campaignId'], j_object=data['item'])
+        item = self.collection_provider.create_by_campaign(profile_id=str(self.profile_provider.get_by_user_id(self.scope["session"]["userinfo"]["sub"])._id), collection=data['collection'], campaign_id=data['campaignId'], item=data['item'])
         # Send the message to the group
         await self.channel_layer.group_send(
             group_name,
@@ -155,5 +174,12 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
                 "type": "object_added",
                 "collection": data['collection'],
                 "item": data['item']
+        }
+        await self.send(text_data=dumps(message))
+
+    async def object_updated(self, data):
+        message = {
+                "type": "object_updated",
+                "parameters": data['parameters'],
         }
         await self.send(text_data=dumps(message))

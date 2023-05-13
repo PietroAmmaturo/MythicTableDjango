@@ -73,8 +73,8 @@ class CollectionCampaignView(CollectionProviderView):
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(self.profile_provider.get_by_user_id(user_id=user_id)._id)
         try:
-            jObject = request.data
-            data = self.collection_provider.create_by_campaign(str(profile_id), collection, str(campaignId), jObject)
+            item = request.data
+            data = self.collection_provider.create_by_campaign(str(profile_id), collection, str(campaignId), item)
             return Response(data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
