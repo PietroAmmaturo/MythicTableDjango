@@ -102,7 +102,7 @@ export default {
             return element.results != null;
         },
         isSingleRoll(message) {
-            console.log("message: ", message)
+            console.log('message: ', message);
             if (message.elements.length != 1) return false;
             if (message.elements[0].results == null) return false;
             return message.elements[0].results.rolls.length != 0;
