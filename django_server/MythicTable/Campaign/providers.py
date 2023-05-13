@@ -5,6 +5,7 @@ import pymongo
 from bson import ObjectId
 from MythicTable.providers import MongoDbProvider
 
+
 class MongoDbCampaignProvider(MongoDbProvider):
     def __init__(self, client=None, db_name=None):
         super().__init__(client, db_name)
@@ -56,14 +57,17 @@ class MongoDbCampaignProvider(MongoDbProvider):
         if not message_serializer.is_valid():
             message = f"Unable to create campaign messages, serialization errors: {message_container_serializer.errors}"
             raise CampaignInvalidException(message)
-        
-        message_container_data = {"_id": campaign._id, "Messages": message_serializer.data}
-        message_container_serializer = MessageContainerDBSerializer(data=message_container_data)
+
+        message_container_data = {"_id": campaign._id,
+                                  "Messages": message_serializer.data}
+        message_container_serializer = MessageContainerDBSerializer(
+            data=message_container_data)
         if not message_container_serializer.is_valid():
             message = f"Unable to create campaign message container, serialization errors: {message_container_serializer.errors}"
             raise CampaignInvalidException(message)
 
-        result = self.campaign_messages_collection.insert_one(message_container_serializer.data)
+        result = self.campaign_messages_collection.insert_one(
+            message_container_serializer.data)
         if (not result.acknowledged):
             message = f"Unable to create campaign messages, result: {result}"
             raise CampaignInvalidException(message)
@@ -97,7 +101,8 @@ class MongoDbCampaignProvider(MongoDbProvider):
         return campaign
 
     def delete(self, campaign_id: str) -> Campaign:
-        result = self.campaign_collection.delete_one({"_id": ObjectId(campaign_id)})
+        result = self.campaign_collection.delete_one(
+            {"_id": ObjectId(campaign_id)})
         if (not result.acknowledged):
             message = f"Unable to delete campaign, result {result}"
             raise CampaignInvalidException(message)
@@ -133,13 +138,10 @@ class MongoDbCampaignProvider(MongoDbProvider):
     def remove_player(self, campaign_id: str, player: Player) -> Campaign:
         try:
             campaign = self.get(campaign_id)
-            number_removed = len(
-                [p for p in campaign.players if p.name == player.name])
+            number_removed = len([p for p in campaign.players if p.name == player.name])
             if number_removed == 0:
-                raise CampaignRemovePlayerException(
-                    f"The player '{player.name}' is not in campaign {campaign_id}")
-            campaign.players = [
-                p for p in campaign.players if p.name != player.name]
+                raise CampaignRemovePlayerException(f"The player '{player.name}' is not in campaign {campaign_id}")
+            campaign.players = [p for p in campaign.players if p.name != player.name]
             return self.update(campaign_id, campaign)
         except CampaignNotFoundException:
             raise CampaignNotFoundException(
@@ -158,7 +160,8 @@ class MongoDbCampaignProvider(MongoDbProvider):
         if not serializer.is_valid():
             message = f"The campaign message container for campaign: {campaign_id} stored in the DB is not valid: {serializer.errors}"
             raise CampaignInvalidException(message)
-        campaign_message_container = serializer.create(serializer.validated_data)
+        campaign_message_container = serializer.create(
+            serializer.validated_data)
         messages = campaign_message_container.messages
         initial_index = len(messages) - (page_size * page)
         # If there are no messages in a page, return empty list
@@ -170,13 +173,13 @@ class MongoDbCampaignProvider(MongoDbProvider):
         messages = messages[initial_index: initial_index + page_size]
         return messages
 
-
     def add_message(self, campaign_id: str, message: Message):
         # Add player to the array and let MongoDB generate an _id for the player
         serializer = MessageDBSerializer(message)
         new_message = serializer.data
         del new_message['_id']
-        new_message['_id'] = ObjectId() #Creating it here because mongo will not create it for an array element
+        # Creating it here because mongo will not create it for an array element
+        new_message['_id'] = ObjectId()
         result = self.campaign_messages_collection.update_one({"_id": ObjectId(campaign_id)}, {
             "$push": {"Messages": new_message}})
         # if nothing has been modified

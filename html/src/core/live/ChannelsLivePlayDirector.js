@@ -54,13 +54,13 @@ class LivePlayDirector {
                         this.onExceptionRaised(event);
                         break;
                     case 'message_received':
-                        this.onMessageReceived(event);
+                        this.onMessageReceived(event.data.message);
                         break;
                     case 'object_updated':
                         this.onObjectUpdated(event);
                         break;
                     case 'object_added':
-                        this.onObjectAdded(event);
+                        this.onObjectAdded(event.data.collection, event.data.item);
                         break;
                     case 'object_removed':
                         this.onObjectRemoved(event);
@@ -193,7 +193,7 @@ class LivePlayDirector {
     async addCampaignObject(collection, map) {
         return await this.connection.send({
             type: 'add_collection_item',
-            collection,
+            collection: collection,
             campaignId: this.sessionId,
             item: map,
         });

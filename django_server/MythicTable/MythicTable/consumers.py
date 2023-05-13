@@ -1,10 +1,8 @@
 from channels.consumer import SyncConsumer
-import json
-
 from channels.generic.websocket import AsyncWebsocketConsumer
-import json
 from asgiref.sync import sync_to_async
-
+from bson.json_util import loads, dumps
+import json
 from Campaign.providers import MongoDbCampaignProvider
 from Campaign.serializers import MessageAPISerializer
 from Collections.providers import MongoDbCollectionProvider
@@ -34,7 +32,7 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
         campaign = self.campaign_provider.get(campaign_id)
         profile_id = str(self.profile_provider.get_by_user_id(self.scope["session"]["userinfo"]["sub"])._id)
         print(f"---Validating Campaign Member {profile_id} {campaign_id}")
-        if campaign.owner != profile_id and not any(player.name == profile_id for player in campaign.players):
+        if campaign.owner != profile_id and not any(player["name"] == profile_id for player in campaign.players):
             error_message = f"User: {profile_id} is not in Campaign: {campaign_id}"
             print(f"UnauthorizedException with User: {profile_id} in Campaign: {campaign_id}")
             raise UnauthorizedException(error_message)
@@ -65,6 +63,7 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
             'add_collection_item': self.handle_add_collection_item,
             'remove_campaign_object': self.handle_remove_campaign_object,
             'draw_line': self.handle_draw_line,
+            'message_received': self.message_received
         }
 
         # check if the message type exists in the dictionary and call the appropriate function
@@ -120,7 +119,21 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
 
     async def handle_add_collection_item(self, data):
         print('handle_add_collection_item', data)
+        group_name = data['campaignId']
+        await self.validate_campaign_member(data['campaignId'])
 
+        item = self.collection_provider.create_by_campaign(user_id=str(self.profile_provider.get_by_user_id(self.scope["session"]["userinfo"]["sub"])._id), collection=data['collection'], campaign_id=data['campaignId'], j_object=data['item'])
+        # Send the message to the group
+        await self.channel_layer.group_send(
+            group_name,
+            {
+                "type": "object_added",
+                "collection": data['collection'],
+                "item": item
+            }
+        )
+        return True
+    
     async def handle_remove_campaign_object(self, data):
         print('handle_remove_campaign_object', data)
 
@@ -129,3 +142,18 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
 
     async def handle_unknown_type(self, data):
         print('handle_unknown_type', data)
+
+    async def message_received(self, data):
+        message = {
+            "type": "message_received",
+            "message": data["message"]
+        }
+        await self.send(text_data=dumps(message))
+
+    async def object_added(self, data):
+        message = {
+                "type": "object_added",
+                "collection": data['collection'],
+                "item": data['item']
+        }
+        await self.send(text_data=dumps(message))
