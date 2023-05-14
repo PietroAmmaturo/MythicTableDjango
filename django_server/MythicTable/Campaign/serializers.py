@@ -1,5 +1,6 @@
 from Textparsing.serializers import ChatDBSerializer, ChatAPISerializer
 from Textparsing.models import Chat, Element
+from Textparsing.utils import ChatParser
 from rest_framework import serializers
 from .models import Campaign, Player, Message, MessageContainer
 from django.utils import timezone
@@ -94,9 +95,7 @@ class MessageAPISerializer(serializers.ModelSerializer):
         if 'timestamp' not in instance_data or not instance_data['timestamp']:
             instance_data['timestamp'] = timezone.now()
         if 'result' not in instance_data or not instance_data['result']:
-            elements=[Element(text=instance_data["message"])]
-            print(elements)
-            instance_data['result'] = Chat(message=instance_data['message'], elements=elements)
+            instance_data['result'] = ChatParser().parse_and_roll_dice(instance_data["message"])
         message = Message(**instance_data)
         return message
 ########################
