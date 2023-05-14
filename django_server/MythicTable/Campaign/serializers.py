@@ -95,7 +95,7 @@ class MessageAPISerializer(serializers.ModelSerializer):
         if 'timestamp' not in instance_data or not instance_data['timestamp']:
             instance_data['timestamp'] = timezone.now()
         if 'result' not in instance_data or not instance_data['result']:
-            instance_data['result'] = ChatParser().parse_and_roll_dice(instance_data["message"])
+            instance_data['result'] = ChatParser().parse(instance_data["message"])
         message = Message(**instance_data)
         return message
 ########################
