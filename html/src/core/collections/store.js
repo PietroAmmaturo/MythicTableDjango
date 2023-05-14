@@ -110,7 +110,7 @@ const CollectionStore = {
             commit('remove', { collection, id });
         },
         async onUpdated({ commit, state }, parameters) {
-            console.log(parameters)
+            console.log(parameters);
             commit('patch', parameters);
             if (parameters.collection == COLLECTION_TYPES.maps) {
                 const item = getItem(state, parameters.collection, parameters.id);

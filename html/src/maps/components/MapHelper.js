@@ -1,6 +1,6 @@
 export default function getAllImages(maps) {
     let images = {};
-    console.log(maps)
+    console.log(maps);
     maps.forEach(map => {
         map.stage.elements.forEach(element => {
             if (element) {

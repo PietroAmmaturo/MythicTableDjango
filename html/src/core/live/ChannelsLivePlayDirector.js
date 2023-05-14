@@ -192,17 +192,17 @@ class LivePlayDirector {
 
     async addCampaignObject(collection, map) {
         const payload = { collection: collection, campaignId: this.sessionId, item: map };
-        this.connection.send({type: 'add_collection_item', payload: payload});
+        this.connection.send({ type: 'add_collection_item', payload: payload });
     }
 
     async removeCampaignObject(collection, id) {
-        const payload = { collection: collection, campaignId: this.sessionId, id: id};
-        this.connection.send({type: 'remove_campaign_object', payload: payload});
+        const payload = { collection: collection, campaignId: this.sessionId, id: id };
+        this.connection.send({ type: 'remove_campaign_object', payload: payload });
     }
 
     async drawLine(mapId, line) {
-        const payload = { collection: collection, campaignId: this.sessionId, line: line};
-        return await this.connection.send({type: 'draw_line', payload: payload});
+        const payload = { campaignId: this.sessionId, line: line };
+        return await this.connection.send({ type: 'draw_line', payload: payload });
     }
 
     onLineDrawn(line) {

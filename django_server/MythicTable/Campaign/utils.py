@@ -31,7 +31,7 @@ class CampaignUtils:
             profile_id = str(owner), 
             collection = "maps", 
             campaign_id = str(created_campaign._id), 
-            j_object = MapUtils.create_map("/static/assets/tutorial/thank-you.jpg", 37, 25, 140)
+            item = MapUtils.create_map("/static/assets/tutorial/thank-you.jpg", 37, 25, 140)
         )
 
         return created_campaign
