@@ -58,7 +58,7 @@ class MongoDbCollectionProvider(MongoDbProvider):
         return result.deleted_count
 
     def update(self, profile_id: str, collection_id: str, item_id: str, patch: dict) -> int:
-        bson_patch = self._json_to_bson(patch)
+        bson_patch = self._bson_to_json(patch)
         result = self.collection_collection.update_one(
             {self.COLLECTION_FIELD: collection_id, self.USER_ID_FIELD: profile_id, '_id': ObjectId(item_id)},
             {'$set': bson_patch}
@@ -69,7 +69,7 @@ class MongoDbCollectionProvider(MongoDbProvider):
         return result.modified_count
 
     def create_by_campaign(self, profile_id, collection, campaign_id, item):
-        bson = loads(dumps(item))
+        bson = item
         if '_id' in bson:
             del bson['_id']
         bson[self.USER_ID_FIELD] = profile_id
@@ -78,7 +78,7 @@ class MongoDbCollectionProvider(MongoDbProvider):
         result = self.collection_collection.insert_one(bson)
         bson["_id"] = result.inserted_id
         a = self.collection_collection.find_one({"_id" : ObjectId(str(result.inserted_id))})
-        return loads(dumps(bson))
+        return self._bson_to_json(bson)
 
     def get_list_by_campaign(self, collection, campaign_id):
         results = list(self.collection_collection.find({
@@ -86,9 +86,7 @@ class MongoDbCollectionProvider(MongoDbProvider):
             self.CAMPAIGN_FIELD: campaign_id
         }))
         if results:
-            for result in results:
-                result["_id"] = str(result["_id"])
-            return [loads(dumps(result)) for result in results]
+            return [self._bson_to_json(result) for result in results]
         message = f"Could not find collection '{collection}' for campaign '{campaign_id}'"
         print(message)
         return []
@@ -101,7 +99,7 @@ class MongoDbCollectionProvider(MongoDbProvider):
         }).to_list(length=None)
         bson = results[0] if results else None
         if bson:
-            return loads(dumps(bson))
+            return self._bson_to_json(bson)
         message = f"Could not find item '{item_id}' in collection '{collection_id}' for campaign '{campaign_id}'"
         raise MythicTableException(message)
 
@@ -142,6 +140,7 @@ class MongoDbCollectionProvider(MongoDbProvider):
                 update["$set"][JsonPatchTranslator.json_path_to_mongo_path(operation["path"])] = JsonPatchTranslator.json_to_bson(operation["value"])
         results = self.collection_collection.update_one(filter, update)
         self.internal_pull(patch, filter)
+        print(results, results.modified_count)
         return results.modified_count
 
     def internal_pull(self, patch, filter):

@@ -118,7 +118,7 @@ class MongoDbCampaignProvider(MongoDbProvider):
     def add_player(self, campaign_id: str, player: Player) -> Campaign:
         campaign = self.get(campaign_id)
         # Check if player is already in
-        if any(p.name == player.name for p in campaign.players):
+        if any(p["name"] == player.name for p in campaign.players):
             raise CampaignAddPlayerException(
                 f"The player '{player.name}' is already in campaign {campaign_id}")
         # Add player to the array and let MongoDB generate an _id for the player
@@ -138,10 +138,10 @@ class MongoDbCampaignProvider(MongoDbProvider):
     def remove_player(self, campaign_id: str, player: Player) -> Campaign:
         try:
             campaign = self.get(campaign_id)
-            number_removed = len([p for p in campaign.players if p.name == player.name])
+            number_removed = len([p for p in campaign.players if p["name"] == player.name])
             if number_removed == 0:
                 raise CampaignRemovePlayerException(f"The player '{player.name}' is not in campaign {campaign_id}")
-            campaign.players = [p for p in campaign.players if p.name != player.name]
+            campaign.players = [p for p in campaign.players if p["name"] != player.name]
             return self.update(campaign_id, campaign)
         except CampaignNotFoundException:
             raise CampaignNotFoundException(

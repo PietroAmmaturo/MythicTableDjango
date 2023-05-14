@@ -57,16 +57,16 @@ class LivePlayDirector {
                         this.onMessageReceived(event.data.message);
                         break;
                     case 'object_updated':
-                        this.onObjectUpdated(event);
+                        this.onObjectUpdated(event.data.parameters);
                         break;
                     case 'object_added':
                         this.onObjectAdded(event.data.collection, event.data.item);
                         break;
                     case 'object_removed':
-                        this.onObjectRemoved(event);
+                        this.onObjectRemoved(event.data.collection, event.data.id);
                         break;
                     case 'line_drawn':
-                        this.onLineDrawn(event);
+                        this.onLineDrawn(event.data.line);
                         break;
                     default:
                         console.log('Unknown event type:', event.data.type);
@@ -160,13 +160,13 @@ class LivePlayDirector {
     }
 
     async addCharacter(image, pos, mapId) {
-        const request = { campaignId: this.sessionId, x: pos.q, y: pos.r, image, mapId };
-        this.connection.send({ type: 'add_character', request });
+        const payload = { campaignId: this.sessionId, x: pos.q, y: pos.r, image: image, mapId: mapId };
+        this.connection.send({ type: 'add_character', payload: payload });
     }
 
     async removeCharacter(characterId) {
-        const request = { campaignId: this.sessionId, characterId: characterId };
-        this.connection.send({ type: 'remove_character', request });
+        const payload = { campaignId: this.sessionId, characterId: characterId };
+        this.connection.send({ type: 'remove_character', payload: payload });
     }
 
     submitRoll(diceObject) {
@@ -174,9 +174,9 @@ class LivePlayDirector {
     }
 
     async tryRollDice(diceObject) {
-        const request = { campaignId: this.sessionId, diceObject: diceObject };
+        const payload = { campaignId: this.sessionId, diceObject: diceObject };
         //TODO Check for valid diceObject
-        this.connection.send({ type: 'roll_dice', request });
+        this.connection.send({ type: 'roll_dice', payload: payload });
     }
 
     onMessageReceived(message) {
@@ -186,39 +186,23 @@ class LivePlayDirector {
     }
 
     async updateCampaignObject(collection, id, patch) {
-        const payload = { collection, campaignId: this.sessionId, id, patch };
-        return await this.connection.send({ type: 'update_object', payload });
+        const payload = { collection: collection, campaignId: this.sessionId, id: id, patch: patch };
+        this.connection.send({ type: 'update_object', payload: payload });
     }
 
     async addCampaignObject(collection, map) {
-        return await this.connection.send({
-            type: 'add_collection_item',
-            collection: collection,
-            campaignId: this.sessionId,
-            item: map,
-        });
+        const payload = { collection: collection, campaignId: this.sessionId, item: map };
+        this.connection.send({type: 'add_collection_item', payload: payload});
     }
 
     async removeCampaignObject(collection, id) {
-        const success = await this.connection.send({
-            type: 'remove_campaign_object',
-            collection,
-            campaignId: this.sessionId,
-            id,
-        });
-        if (!success) {
-            console.warn(`Collection object ${id} was not deleted`);
-        }
-        return success;
+        const payload = { collection: collection, campaignId: this.sessionId, id: id};
+        this.connection.send({type: 'remove_campaign_object', payload: payload});
     }
 
     async drawLine(mapId, line) {
-        return await this.connection.send({
-            type: 'draw_line',
-            campaignId: this.sessionId,
-            mapId: mapId,
-            item: line,
-        });
+        const payload = { collection: collection, campaignId: this.sessionId, line: line};
+        return await this.connection.send({type: 'draw_line', payload: payload});
     }
 
     onLineDrawn(line) {
