@@ -6,7 +6,6 @@ from MythicTable.exceptions import MythicTableException
 from pymongo.errors import PyMongoError
 from rest_framework.exceptions import NotFound
 from MythicTable.providers import MongoDbProvider
-import jsonpatch
 
 class MongoDbCollectionProvider(MongoDbProvider):
     COLLECTION_FIELD = '_collection'
@@ -68,7 +67,7 @@ class MongoDbCollectionProvider(MongoDbProvider):
             raise MythicTableException(message)
         return result.modified_count
 
-    def create_by_campaign(self, profile_id, collection, campaign_id, item):
+    def create_by_campaign(self, profile_id: str, collection: str, campaign_id: str, item: str) -> str:
         bson = item
         if '_id' in bson:
             del bson['_id']
@@ -77,10 +76,10 @@ class MongoDbCollectionProvider(MongoDbProvider):
         bson[self.CAMPAIGN_FIELD] = campaign_id
         result = self.collection_collection.insert_one(bson)
         bson["_id"] = result.inserted_id
-        a = self.collection_collection.find_one({"_id" : ObjectId(str(result.inserted_id))})
-        return self._bson_to_json(bson)
+        inserted = self.collection_collection.find_one({"_id" : ObjectId(str(result.inserted_id))})
+        return self._bson_to_json(inserted)
 
-    def get_list_by_campaign(self, collection, campaign_id):
+    def get_list_by_campaign(self, collection: str, campaign_id: str) -> list[str]:
         results = list(self.collection_collection.find({
             self.COLLECTION_FIELD: collection,
             self.CAMPAIGN_FIELD: campaign_id
@@ -91,19 +90,19 @@ class MongoDbCollectionProvider(MongoDbProvider):
         print(message)
         return []
 
-    def get_by_campaign(self, collection_id, campaign_id, item_id):
-        results = self.collection_collection.find({
+    def get_by_campaign(self, collection_id: str, campaign_id: str, item_id: str) -> list[str]:
+        results = list(self.collection_collection.find({
             self.COLLECTION_FIELD: collection_id,
             self.CAMPAIGN_FIELD: campaign_id,
             "_id": ObjectId(item_id)
-        }).to_list(length=None)
+        }))
         bson = results[0] if results else None
         if bson:
             return self._bson_to_json(bson)
         message = f"Could not find item '{item_id}' in collection '{collection_id}' for campaign '{campaign_id}'"
         raise MythicTableException(message)
 
-    def update_by_campaign(self, collection, campaign_id, item_id, patch):
+    def update_by_campaign(self, collection: str, campaign_id: str, item_id: str, patch: list[dict[str, str]]) -> int:
         filter = {
             self.COLLECTION_FIELD: collection,
             self.CAMPAIGN_FIELD: campaign_id,
@@ -115,7 +114,7 @@ class MongoDbCollectionProvider(MongoDbProvider):
             raise MythicTableException(message)
         return updated
 
-    def delete_by_campaign(self, collection, campaign_id, item_id):
+    def delete_by_campaign(self, collection: str, campaign_id: str, item_id: str) -> int:
         deleted = self.collection_collection.delete_one({
             self.COLLECTION_FIELD: collection,
             self.CAMPAIGN_FIELD: campaign_id,
@@ -126,7 +125,7 @@ class MongoDbCollectionProvider(MongoDbProvider):
             raise MythicTableException(message)
         return deleted.deleted_count
 
-    def internal_update(self, patch: jsonpatch, filter):
+    def internal_update(self, patch: list[dict[str, str]], filter: dict[str, ]) -> int:
         patch_operation = patch[0]
         if patch_operation["op"] == "remove":
             update = {"$unset": {JsonPatchTranslator.json_path_to_mongo_path(patch_operation["path"]): ""}}
@@ -143,7 +142,7 @@ class MongoDbCollectionProvider(MongoDbProvider):
         print(results, results.modified_count)
         return results.modified_count
 
-    def internal_pull(self, patch, filter):
+    def internal_pull(self, patch: list[dict[str, str]], filter: dict[str, ]):
         pull_ops_used = False
         pull_ops = {}
 
