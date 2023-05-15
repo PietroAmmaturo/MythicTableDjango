@@ -81,31 +81,18 @@ class CampaignUtils:
             )
             created_characters.append(c)
 
-        # Create maps
-        map1 = {
-            "ImageUrl": "/static/assets/tutorial/basic-map-interactions.jpg",
-            "Width": 37,
-            "Height": 25,
-            "Scale": 140,
-            "start": {"n": 2, "w": 2, "s": 12, "e": 18}
-        }
+        # Create map1 using MapUtils.create_map()
+        map1 = MapUtils.create_map("/static/assets/tutorial/basic-map-interactions.jpg", 37, 25, 140)
+        map1["start"] = {"n": 2, "w": 2, "s": 12, "e": 18}
         map1 = collection_provider.create_by_campaign(str(owner), "maps", str(campaign._id), map1)
 
-        map2 = {
-            "ImageUrl": "/static/assets/tutorial/drawing-tools-chat.jpg",
-            "Width": 37,
-            "Height": 25,
-            "Scale": 140,
-            "start": {"n": 2, "w": 2, "s": 12, "e": 18}
-        }
+        # Create map2 using MapUtils.create_map()
+        map2 = MapUtils.create_map("/static/assets/tutorial/drawing-tools-chat.jpg", 37, 25, 140)
+        map2["start"] = {"n": 2, "w": 2, "s": 12, "e": 18}
         map2 = collection_provider.create_by_campaign(str(owner), "maps", str(campaign._id), map2)
 
-        map3 = {
-            "ImageUrl": "/static/assets/tutorial/thank-you.jpg",
-            "Width": 37,
-            "Height": 25,
-            "Scale": 140
-        }
+        # Create map3 using MapUtils.create_map()
+        map3 = MapUtils.create_map("/static/assets/tutorial/thank-you.jpg", 37, 25, 140)
         map3 = collection_provider.create_by_campaign(str(owner), "maps", str(campaign._id), map3)
 
         # Create tokens
@@ -126,7 +113,7 @@ class CampaignUtils:
         for token in tokens:
             collection_provider.create_by_campaign(
                 str(owner),
-                "characters",
+                "tokens",
                 str(campaign._id),
                 CharacterUtil.create_collection_token(token[0], token[1], token[2], token[3], token[4], token[5], token[6], token[7], token[8], token[9])
             )
