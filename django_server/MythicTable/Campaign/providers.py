@@ -13,7 +13,7 @@ class MongoDbCampaignProvider(MongoDbProvider):
         self.campaign_messages_collection = self.db['campaign-messages']
 
     # get using the profile
-    def get_all(self, profile_id: str):
+    def get_all(self, profile_id: str) -> list[Campaign]:
         # Define the filter
         filter = {"$or": [{"Owner": profile_id}, {"Players.Name": profile_id}]}
         # Find the first document that matches the filter
@@ -27,7 +27,7 @@ class MongoDbCampaignProvider(MongoDbProvider):
         return campaign
 
     # get using the mongoDB Object id
-    def get(self, campaign_id: str):
+    def get(self, campaign_id: str) -> Campaign:
         # Define the filter
         filter = {"_id": ObjectId(campaign_id)}
         # Find the first document that matches the filter
@@ -41,7 +41,7 @@ class MongoDbCampaignProvider(MongoDbProvider):
             campaign = serializer.create(serializer.validated_data)
             return campaign
 
-    def create(self, campaign):
+    def create(self, campaign: Campaign) -> Campaign:
         # Serialization
         serializer = CampaignDBSerializer(campaign)
         new_campaign = serializer.data
@@ -73,7 +73,7 @@ class MongoDbCampaignProvider(MongoDbProvider):
             raise CampaignInvalidException(message)
         return campaign
 
-    def get_by_join_id(self, join_id: str):
+    def get_by_join_id(self, join_id: str) -> Campaign:
         filter = {"JoinId": join_id}
         # Find the first document that matches the filter
         dto = self.campaign_collection.find_one(filter)
@@ -107,7 +107,7 @@ class MongoDbCampaignProvider(MongoDbProvider):
             message = f"Unable to delete campaign, result {result}"
             raise CampaignInvalidException(message)
 
-    def get_players(self, campaign_id: str):
+    def get_players(self, campaign_id: str) -> list[Player]:
         try:
             campaign = self.get(campaign_id)
             return campaign.players
@@ -121,10 +121,11 @@ class MongoDbCampaignProvider(MongoDbProvider):
         if any(p["name"] == player.name for p in campaign.players):
             raise CampaignAddPlayerException(
                 f"The player '{player.name}' is already in campaign {campaign_id}")
-        # Add player to the array and let MongoDB generate an _id for the player
+        # Add player to the array
         serializer = PlayerDBSerializer(player)
         new_player = serializer.data
         del new_player['_id']
+        # Creating ObjectId here because mongo will not create it for an array element
         new_player["_id"] = ObjectId()
         result = self.campaign_collection.update_one({"_id": ObjectId(campaign_id)}, {
             "$push": {"Players": new_player}})
@@ -147,7 +148,7 @@ class MongoDbCampaignProvider(MongoDbProvider):
             raise CampaignNotFoundException(
                 f"Remove Player. Cannot find campaign of id {campaign_id}")
 
-    def get_messages(self, campaign_id: str, page_size: int, page: int):
+    def get_messages(self, campaign_id: str, page_size: int, page: int) -> list[Message]:
         # Define the filter
         filter = {"_id": ObjectId(campaign_id)}
         # Find the first document that matches the filter
@@ -173,12 +174,12 @@ class MongoDbCampaignProvider(MongoDbProvider):
         messages = messages[initial_index: initial_index + page_size]
         return messages
 
-    def add_message(self, campaign_id: str, message: Message):
-        # Add player to the array and let MongoDB generate an _id for the player
+    def add_message(self, campaign_id: str, message: Message) -> Message:
+        # Add player to the array
         serializer = MessageDBSerializer(message)
         new_message = serializer.data
         del new_message['_id']
-        # Creating it here because mongo will not create it for an array element
+        # Creating ObjectId here because mongo will not create it for an array element
         new_message['_id'] = ObjectId()
         result = self.campaign_messages_collection.update_one({"_id": ObjectId(campaign_id)}, {
             "$push": {"Messages": new_message}})
