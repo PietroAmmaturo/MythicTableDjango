@@ -41,15 +41,6 @@ class LivePlayDirector {
                     case 'join_refuse':
                         this.onJoinRefuse(event);
                         break;
-                    case 'confirm_op_delta':
-                        this.onConfirmDelta(event);
-                        break;
-                    case 'character_added':
-                        this.onCharacterAdded(event);
-                        break;
-                    case 'character_removed':
-                        this.onCharacterRemoved(event);
-                        break;
                     case 'exception_raised':
                         this.onExceptionRaised(event);
                         break;
@@ -139,34 +130,9 @@ class LivePlayDirector {
         await this.postloadMaps(maps);
         this.store.dispatch('gamestate/setBase');
     }
-    onConfirmDelta(sessionDelta) {
-        this.store.dispatch('gamestate/applyDelta', sessionDelta.delta);
-    }
-
-    async onCharacterAdded(characterDto) {
-        this.store.dispatch('gamestate/entities/load', [characterDto]);
-        await Asset.loadAll([characterDto]);
-    }
-
-    onCharacterRemoved(characterId) {
-        const patch = { op: 'remove', path: `/entities/${characterId}` };
-        console.log('onCharRemoved');
-        this.store.dispatch('gamestate/patch', patch);
-        this.store.dispatch('gamestate/entities/remove', characterId);
-    }
 
     onExceptionRaised(error) {
         console.err('Exception raised by server: ' + error);
-    }
-
-    async addCharacter(image, pos, mapId) {
-        const payload = { campaignId: this.sessionId, x: pos.q, y: pos.r, image: image, mapId: mapId };
-        this.connection.send({ type: 'add_character', payload: payload });
-    }
-
-    async removeCharacter(characterId) {
-        const payload = { campaignId: this.sessionId, characterId: characterId };
-        this.connection.send({ type: 'remove_character', payload: payload });
     }
 
     submitRoll(diceObject) {

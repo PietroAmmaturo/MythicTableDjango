@@ -36,7 +36,7 @@ class ChatParser:
                 return Chat(message=message, elements= [Element(text=message)])
         except Exception as e:
             print(f"Exception occurred: {str(e)}")
-            return Chat(message=message, elements= [ErrorElement(text=message, error="Could not parse and roll dice"), Element(text="Could not parse and roll dice")])
+            return Chat(message=message, elements= [ErrorElement(text=message, error="Could not roll dice, please use a valid expression")])
     
     def replace(self, expression, values):
         def replace_match(match):
