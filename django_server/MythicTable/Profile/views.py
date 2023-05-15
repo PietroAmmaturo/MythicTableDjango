@@ -32,7 +32,7 @@ class MeView(ProfileProviderView):
         if not user_id:
             raise PermissionDenied("User is not authenticated")
         try:
-            profile = self.profile_provider.get_by_user_id(user_id=user_id)
+            profile = self.profile_provider.get_by_user_id(user_id)
         except ProfileNotFoundException:
             profile = self.create_default_profile(user_id, request.session.get("userinfo", {}))
         self.update_groups(request, profile)
@@ -41,13 +41,13 @@ class MeView(ProfileProviderView):
 
     def create_default_profile(self, user_id, userinfo):
         groups = userinfo.get("groups", [])
-        serializer = ProfileAPISerializer(ProfileUtils.create_default_profile(user_id=user_id, user_name=userinfo.get("preferred_username"), groups=groups))
+        serializer = ProfileAPISerializer(ProfileUtils.create_default_profile(user_id, userinfo.get("preferred_username"), groups))
         serializer = ProfileAPISerializer(data=serializer.data)
         if not serializer.is_valid():
             message = f"The default profile created for user: '{user_id}' is not valid: {serializer.errors}"
             raise ProfileInvalidException(message)
-        profile = self.profile_provider.create(serializer.create(validated_data=serializer.validated_data))
-        CampaignUtils.create_tutorial_campaign(collection_provider=self.collection_provider, campaign_provider=self.campaign_provider, owner=profile._id)
+        profile = self.profile_provider.create(serializer.create(serializer.validated_data))
+        CampaignUtils.create_tutorial_campaign(self.collection_provider, self.campaign_provider, profile._id)
         return profile
 
     def update_groups(self, request, profile):
@@ -64,7 +64,7 @@ class ProfileView(ProfileProviderView):
     API view for a single profile by ID.
     """
     def get(self, request, profileId=None, format=None):
-        profile = self.profile_provider.get(profile_id=str(profileId))
+        profile = self.profile_provider.get(str(profileId))
         serializer = ProfileAPISerializer(profile)
         return Response(serializer.data)
 

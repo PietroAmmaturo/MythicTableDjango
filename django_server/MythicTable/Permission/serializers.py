@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from .models import Permissions
+from .models import Permission
 from MythicTable.serializers import ObjectIdAPIField, ObjectIdDBField
 
-class PermissionsAPISerializer(serializers.ModelSerializer):
+class PermissionAPISerializer(serializers.ModelSerializer):
     id = ObjectIdAPIField(default=None, allow_null=True, required=False, source='_id')
     isPublic = serializers.CharField(source='is_public')
     permitted = serializers.CharField(source='permitted')
@@ -11,7 +11,7 @@ class PermissionsAPISerializer(serializers.ModelSerializer):
 
     # specify model and fields
     class Meta:
-        model = Permissions
+        model = Permission
         fields = ('id', 'isPublic', 'permitted', 'campaign', 'object')
 
     def create(self, validated_data):
@@ -23,10 +23,10 @@ class PermissionsAPISerializer(serializers.ModelSerializer):
             return self.create_instance(validated_data)
 
     def create_instance(self, instance_data):
-        profile = Permissions(**instance_data)
+        profile = Permission(**instance_data)
         return profile
 
-class PermissionsDBSerializer(serializers.ModelSerializer):
+class PermissionDBSerializer(serializers.ModelSerializer):
     _id = ObjectIdDBField()
     IsPublic = serializers.CharField(source='is_public')
     Permitted = serializers.CharField(source='permitted')
@@ -35,7 +35,7 @@ class PermissionsDBSerializer(serializers.ModelSerializer):
 
     # specify model and fields
     class Meta:
-        model = Permissions
+        model = Permission
         fields = ('_id', 'IsPublic', 'Permitted', 'Campaign', 'Object')
 
     def create(self, validated_data):
@@ -47,5 +47,5 @@ class PermissionsDBSerializer(serializers.ModelSerializer):
             return self.create_instance(validated_data)
 
     def create_instance(self, instance_data):
-        profile = Permissions(**instance_data)
+        profile = Permission(**instance_data)
         return profile

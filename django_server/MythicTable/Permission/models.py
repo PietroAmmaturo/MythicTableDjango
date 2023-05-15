@@ -1,7 +1,7 @@
 from django.db import models
 from bson import ObjectId
 
-class Permissions(models.Model):
+class Permission(models.Model):
     def __init__(self, _id: ObjectId, is_public: bool, permitted: list[str], campaign: str, object: str):
         self._id = _id
         self.is_public = is_public

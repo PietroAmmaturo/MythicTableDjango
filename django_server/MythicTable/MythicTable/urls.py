@@ -20,7 +20,6 @@ from rest_framework.routers import DefaultRouter
 from Profile.views import ProfileView, ProfileListView, MeView
 from Campaign.views import CampaignListView, CampaignView, CampaignJoinView, CampaignLeaveView, CampaignForceLeaveView, CampaignMessagesView, CampaignPlayersView
 from Collections.views import CollectionView, CollectionCampaignView, CollectionProfileView
-from Permissions.views import PermissionsView
 from Files.views import FileListView, FileView
 import pymongo
 from .consumers import LivePlayConsumer
@@ -51,8 +50,6 @@ urlpatterns = [
     path('api/collections/<str:collection>/id/<str:profileId>', CollectionProfileView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
     path('api/collections/<str:collection>/campaign/<str:campaignId>', CollectionCampaignView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
     path('api/collections/<str:collection>/campaign/<str:campaignId>/id/<str:itemId>', CollectionCampaignView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
-
-    path('api/[controller]/<str:campaignId>', PermissionsView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
 
     path('api/files', FileListView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
     path('api/files/<str:fileId>', FileView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),

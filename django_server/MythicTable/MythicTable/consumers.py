@@ -6,10 +6,10 @@ import json
 from Campaign.providers import MongoDbCampaignProvider
 from Campaign.serializers import MessageAPISerializer
 from Collections.providers import MongoDbCollectionProvider
-from Permissions.providers import MongoDbPermissionProvider
-from Permissions.exceptions import UnauthorizedException
+from Permission.providers import MongoDbPermissionProvider
+from Permission.exceptions import UnauthorizedException
 from Profile.providers import MongoDbProfileProvider
-from Permissions.models import Permissions
+from Permission.models import Permission
 from .authentication import AuthenticationBackend
 from .exceptions import MythicTableException
 
@@ -47,7 +47,6 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
             }))
         else:
             await self.close()
-
 
     async def receive(self, text_data):
         # convert received data to a dictionary
@@ -97,7 +96,7 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
             message_data = data['payload']['diceObject']
             await self.validate_campaign_member(group_name)
 
-            serializer = MessageAPISerializer(data = message_data)
+            serializer = MessageAPISerializer(data=message_data)
             if serializer.is_valid():
                 message = serializer.create(serializer.validated_data)
                 campaign_id = message.session_id
@@ -129,9 +128,9 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
             patch = data['payload']['patch']
             await self.validate_campaign_member(group_name)
 
-            if not self.permission_provider.is_authorized(user_id=profile_id, campaign_id=campaign_id, object_id=item_id):
+            if not self.permission_provider.is_authorized(profile_id, campaign_id, item_id):
                 raise UnauthorizedException(f"Update object failed User: {profile_id}, Campaign: {campaign_id}, Object {item_id}")
-            self.collection_provider.update_by_campaign(collection=collection, campaign_id=campaign_id, item_id=item_id, patch=patch)
+            self.collection_provider.update_by_campaign(collection, campaign_id, item_id, patch)
             # Send the message to the group
             await self.channel_layer.group_send(
                 group_name,
@@ -156,7 +155,7 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
 
             await self.validate_campaign_member(group_name)
 
-            new_item = self.collection_provider.create_by_campaign(profile_id=profile_id, collection=collection, campaign_id=campaign_id, item=item)
+            new_item = self.collection_provider.create_by_campaign(profile_id, collection, campaign_id, item)
             # Send the message to the group
             await self.channel_layer.group_send(
                 group_name,
@@ -181,9 +180,9 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
             collection = data['payload']['collection']
             await self.validate_campaign_member(group_name)
 
-            if not self.permission_provider.is_authorized(user_id=profile_id, campaign_id=campaign_id, object_id=item_id):
+            if not self.permission_provider.is_authorized(profile_id, campaign_id, item_id):
                 raise UnauthorizedException(f"Remove object failed User: {profile_id}, Campaign: {campaign_id}, Object {item_id}")
-            self.collection_provider.delete_by_campaign(collection=collection, campaign_id=campaign_id, item_id=item_id)
+            self.collection_provider.delete_by_campaign(collection, campaign_id, item_id)
             # Send the message to the group
             await self.channel_layer.group_send(
                 group_name,

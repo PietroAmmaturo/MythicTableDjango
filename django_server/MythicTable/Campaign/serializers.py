@@ -1,5 +1,4 @@
 from Textparsing.serializers import ChatDBSerializer, ChatAPISerializer
-from Textparsing.models import Chat, Element
 from Textparsing.utils import ChatParser
 from rest_framework import serializers
 from .models import Campaign, Player, Message, MessageContainer
