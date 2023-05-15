@@ -49,7 +49,7 @@ class FileListView(FileProviderView):
             if uploaded_file.size <= 0:
                 continue
             md5 = FileUtils.calculate_md5(uploaded_file)
-            existing_file = self.file_provider.find_duplicate(user_id=profile_id, md5=md5)
+            existing_file = self.file_provider.find_duplicate(profile_id=profile_id, md5=md5)
             store_data = {'reference': existing_file.reference, 'url': existing_file.url} if existing_file else self.file_store.save_file(uploaded_file, profile_id)
             file_data = {
                 "reference" : f"{store_data['reference']}",
@@ -64,7 +64,7 @@ class FileListView(FileProviderView):
                 message = f"One or more files are not valid: {serializer.errors}"
                 raise MythicTableException(message)
             file = serializer.create(serializer.validated_data)
-            files.append(self.file_provider.create(file))
+            files.append(self.file_provider.create(file=file))
         serializer = FileAPISerializer(files, many=True)
         return Response({'count': len(files), 'size': size, 'files': serializer.data})
     
@@ -82,11 +82,11 @@ class FileView(FileProviderView):
         files_to_delete = []
         files_found = []
         for file_id in fileId:
-            file = self.file_provider.get(file_id, profile_id)
-            self.file_provider.delete(file_id, profile_id)
+            file = self.file_provider.get(file_id=fileId, profile_id=profile_id)
+            self.file_provider.delete(file_id=fileId, profile_id=profile_id)
             files_found.append(file)
 
-            if self.file_provider.find_duplicate(file.user, file.md5) is None:
+            if self.file_provider.find_duplicate(profile_id=file.user, md5=file.md5) is None:
                 files_to_delete.append(file)
 
         self.file_store.delete_files(files_to_delete)
