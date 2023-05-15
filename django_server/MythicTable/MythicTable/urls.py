@@ -40,7 +40,7 @@ urlpatterns = [
 
     path('api/campaigns', CampaignListView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
     path('api/campaigns/join/<str:joinId>', CampaignJoinView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
-    path('api/campaigns/<str:campaignId>', CampaignView.as_view(), name='campaign-detail'),
+    path('api/campaigns/<str:campaignId>', CampaignView.as_view(client=client, db_name=settings.MONGODB_DB_NAME), name='campaign-detail'),
     path('api/campaigns/<str:campaignId>/players', CampaignPlayersView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
     path('api/campaigns/<str:campaignId>/messages', CampaignMessagesView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),   
     path('api/campaigns/<str:campaignId>/leave', CampaignLeaveView.as_view(client=client, db_name=settings.MONGODB_DB_NAME)),
