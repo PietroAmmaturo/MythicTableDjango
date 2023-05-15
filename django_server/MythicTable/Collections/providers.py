@@ -16,15 +16,14 @@ class MongoDbCollectionProvider(MongoDbProvider):
         super().__init__(client, db_name)
         self.collection_collection = self.db['collections']
 
-    def create(self, profile_id: str, collection: str, j_object: dict) -> dict:
-        j_object[self.USER_ID_FIELD] = profile_id
-        j_object[self.COLLECTION_FIELD] = collection
-        result = self.collection_collection.insert_one(j_object)
-        j_object['_id'] = str(result.inserted_id)
-        return j_object
+    def create(self, profile_id: str, collection: str, item: dict) -> dict:
+        item[self.USER_ID_FIELD] = profile_id
+        item[self.COLLECTION_FIELD] = collection
+        result = self.collection_collection.insert_one(item)
+        item['_id'] = str(result.inserted_id)
+        return item
 
     def get_list(self, profile_id: str, collection: str) -> list[dict]:
-        print("retriving collection", collection)
         bson_results = self.collection_collection.find(
             {self.COLLECTION_FIELD: collection, self.USER_ID_FIELD: profile_id}
         ).to_list(length=None)
@@ -139,7 +138,6 @@ class MongoDbCollectionProvider(MongoDbProvider):
                 update["$set"][JsonPatchTranslator.json_path_to_mongo_path(operation["path"])] = JsonPatchTranslator.json_to_bson(operation["value"])
         results = self.collection_collection.update_one(filter, update)
         self.internal_pull(patch, filter)
-        print(results, results.modified_count)
         return results.modified_count
 
     def internal_pull(self, patch: list[dict[str, str]], filter: dict[str, ]):
