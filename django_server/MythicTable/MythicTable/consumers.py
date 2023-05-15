@@ -33,10 +33,8 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
     async def validate_campaign_member(self, campaign_id):
         campaign = self.campaign_provider.get(campaign_id)
         profile_id = str(self.profile_provider.get_by_user_id(self.scope["session"]["userinfo"]["sub"])._id)
-        print(f"---Validating Campaign Member {profile_id} {campaign_id}")
         if campaign.owner != profile_id and not any(player["name"] == profile_id for player in campaign.players):
             error_message = f"User: {profile_id} is not in Campaign: {campaign_id}"
-            print(f"UnauthorizedException with User: {profile_id} in Campaign: {campaign_id}")
             raise UnauthorizedException(error_message)
         
     async def connect(self):
@@ -76,7 +74,6 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
 
     async def handle_join_session(self, data):
         try:
-            print('handle_join_session', data)
             group_name = data['request']['campaignId']
             await self.channel_layer.group_add(group_name, self.channel_name)
             message = {
@@ -96,7 +93,6 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
 
     async def handle_roll_dice(self, data):
         try:
-            print('handle_roll_dice', data)
             group_name = data['payload']['campaignId']
             message_data = data['payload']['diceObject']
             await self.validate_campaign_member(group_name)
@@ -105,7 +101,6 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
             if serializer.is_valid():
                 message = serializer.create(serializer.validated_data)
                 campaign_id = message.session_id
-                print("---Sending Message", data)
                 sent_message = self.campaign_provider.add_message(campaign_id, message)
                 serializer = MessageAPISerializer(sent_message)
                 # Send the message to the group
@@ -126,7 +121,6 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
 
     async def handle_update_object(self, data):
         try:
-            print('handle_update_object', data)
             group_name = data['payload']['campaignId']
             profile_id = str(self.profile_provider.get_by_user_id(self.scope["session"]["userinfo"]["sub"])._id)
             campaign_id = data['payload']['campaignId']
@@ -154,7 +148,6 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
     
     async def handle_add_collection_item(self, data):
         try:
-            print('handle_add_collection_item', data)
             group_name = data['payload']['campaignId']
             profile_id = str(self.profile_provider.get_by_user_id(self.scope["session"]["userinfo"]["sub"])._id)
             campaign_id = data['payload']['campaignId']
@@ -181,7 +174,6 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
     
     async def handle_remove_campaign_object(self, data):
         try:
-            print('handle_remove_campaign_object', data)
             group_name = data['payload']['campaignId']
             profile_id = str(self.profile_provider.get_by_user_id(self.scope["session"]["userinfo"]["sub"])._id)
             campaign_id = data['payload']['campaignId']
@@ -209,7 +201,6 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
 
     async def handle_draw_line(self, data):
         try:
-            print('handle_draw_line', data)
             group_name = data['payload']['campaignId']
             line = data['payload']['line']
             await self.validate_campaign_member(group_name)
@@ -229,7 +220,6 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
 
     async def handle_unknown_type(self, data):
         try:
-            print('handle_unknown_type', data)
             raise MythicTableException("Unknown message type")
         except Exception as e:
             await self.send(text_data=json.dumps({

@@ -60,7 +60,6 @@ class CampaignListView(CampaignProviderView):
 class CampaignView(CampaignProviderView):
     @permission_classes([UserIsMemberOfCampaign])
     def get(self, request, campaignId=None):
-        print("retriving campaign")
         campaign = self.campaign_provider.get(campaignId)
         serializer = CampaignAPISerializer(campaign)
         return Response(serializer.data)

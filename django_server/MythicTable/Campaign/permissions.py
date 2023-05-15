@@ -5,7 +5,6 @@ from Profile.providers import MongoDbProfileProvider
 
 class UserIsMemberOfCampaign(BasePermission):
     def has_permission(self, request, view):
-        print("checking user is member of campaign")
         campaign_id = self.kwargs.get("campaignId")
         current_user = request.session['userinfo']['user_id']
 
@@ -20,7 +19,6 @@ class UserIsMemberOfCampaign(BasePermission):
     
 class UserOwnsCampaign(BasePermission):
     def has_permission(self, request, view):
-        print("checking user is owner of campaign")
         campaign_id = self.kwargs.get("campaignId")
         current_user = request.session['userinfo']['user_id']
 

@@ -2,7 +2,6 @@ import axios from 'axios';
 
 async function me() {
     const results = await axios.get(`/api/profiles/me`);
-    console.log(results);
     return results.data;
 }
 

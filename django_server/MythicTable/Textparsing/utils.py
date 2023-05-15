@@ -7,9 +7,7 @@ class ChatParser:
         self.pattern_ex = r'\b\d+d\d+\b'
         
     def apply_formula(self, formula, number):
-        print("rolling")
         try:
-            print("rolling: ", formula, number)
             result = eval(formula, {'x': number})
             return result
         except Exception:
@@ -22,7 +20,6 @@ class ChatParser:
             found = False
             for result in re.findall(self.pattern_ex, message):
                 found = True
-                print(result)
                 roll = re.findall(self.pattern_roll, result)
                 num_dice = int(roll[0])
                 num_faces = int(roll[1])
@@ -35,7 +32,6 @@ class ChatParser:
             else:
                 return Chat(message=message, elements= [Element(text=message)])
         except Exception as e:
-            print(f"Exception occurred: {str(e)}")
             return Chat(message=message, elements= [ErrorElement(text=message, error="Could not roll dice, please use a valid expression")])
     
     def replace(self, expression, values):

@@ -67,7 +67,6 @@ class LivePlayDirector {
     }
 
     async onWebsocketAccept() {
-        console.log('accept ws');
         const request = { campaignId: this.sessionId };
         this.state.connected = true; // FIXME: PoC only; needs to be mutation if used in prod
         await this.connection.send({ type: 'join_session', request });
@@ -120,7 +119,6 @@ class LivePlayDirector {
                     patch.push({ op: 'add', path: '/global/rollLog/-', value: roll });
                 });
                 this.store.dispatch('gamestate/applyDelta', patch);
-                console.log('mess', response);
             })
             .catch(error => {
                 console.error(error);
