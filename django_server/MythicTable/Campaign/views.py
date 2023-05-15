@@ -81,6 +81,7 @@ class CampaignView(CampaignProviderView):
         campaign = self.campaign_provider.get(campaignId)
         self.campaign_provider.delete(campaignId)
         serializer = CampaignAPISerializer(campaign)
+        self.collection_provider.delete_all_by_campaign(campaignId)
         return Response(serializer.data)
 
 class CampaignJoinView(CampaignProviderView):

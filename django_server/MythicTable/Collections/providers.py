@@ -124,6 +124,15 @@ class MongoDbCollectionProvider(MongoDbProvider):
             raise MythicTableException(message)
         return deleted.deleted_count
 
+    def delete_all_by_campaign(self, campaign_id: str) -> int:
+        deleted = self.collection_collection.delete_many({
+            self.CAMPAIGN_FIELD: campaign_id
+        })
+        if deleted.deleted_count == 0:
+            message = f"Could not delete items for campaign '{campaign_id}'"
+            raise MythicTableException(message)
+        return deleted.deleted_count
+    
     def internal_update(self, patch: list[dict[str, str]], filter: dict[str, ]) -> int:
         patch_operation = patch[0]
         if patch_operation["op"] == "remove":

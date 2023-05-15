@@ -100,11 +100,17 @@ class MongoDbCampaignProvider(MongoDbProvider):
             raise CampaignInvalidException(message)
         return campaign
 
+    #TODO: upon deletion, campaigns must delete their messages collection and all associated collections
     def delete(self, campaign_id: str) -> Campaign:
         result = self.campaign_collection.delete_one(
             {"_id": ObjectId(campaign_id)})
         if (not result.acknowledged):
             message = f"Unable to delete campaign, result {result}"
+            raise CampaignInvalidException(message)
+        result = self.campaign_messages_collection.delete_one(
+            {"_id": ObjectId(campaign_id)})
+        if (not result.acknowledged):
+            message = f"Unable to delete campaign messages, result {result}"
             raise CampaignInvalidException(message)
 
     def get_players(self, campaign_id: str) -> list[Player]:
