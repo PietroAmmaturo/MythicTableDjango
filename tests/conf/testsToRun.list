@@ -1,5 +1,0 @@
-# List of Tests to Run
-# Note: must be fully qualified class names (include package)
-
-# Simple test to static Hello API
-com.mythictable.test.HelloAPI

@@ -1,8 +1,0 @@
-version: "3"
-services:
-  mythicapp:
-    container_name: mythicapp
-    build:
-      context: .
-    ports:
-      - "80:80"

@@ -1,7 +1,0 @@
-flags:
-  frontend:
-    paths:
-      - html/
-  backend:
-    paths:
-      - server/tests/
