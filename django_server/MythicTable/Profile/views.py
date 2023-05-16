@@ -47,7 +47,7 @@ class MeView(ProfileProviderView):
             message = f"The default profile created for user: '{user_id}' is not valid: {serializer.errors}"
             raise ProfileInvalidException(message)
         profile = self.profile_provider.create(serializer.create(serializer.validated_data))
-        CampaignUtils.create_tutorial_campaign(self.collection_provider, self.campaign_provider, profile._id)
+        CampaignUtils.create_tutorial_campaign(self.campaign_provider, self.collection_provider, profile._id)
         return profile
 
     def update_groups(self, request, profile):

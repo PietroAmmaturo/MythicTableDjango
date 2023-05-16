@@ -64,7 +64,7 @@ class CampaignUtils:
                             last_modified=datetime.datetime.now(),
                             image_url="/static/assets/tutorial/campaign-banner.jpg",
                             players=[])
-        campaign = campaign_provider.create(campaign)
+        campaign = campaign_provider.create(campaign=campaign)
 
         # Create characters
         characters = [

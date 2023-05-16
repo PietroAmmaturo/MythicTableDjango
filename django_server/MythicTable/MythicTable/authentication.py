@@ -36,7 +36,7 @@ class AuthenticationBackend(BasicAuthentication):
             # Get the JWT token from the Authorization header
             token = scope['query_string'].decode().split('access_token=')[1] if scope else request.META.get('HTTP_AUTHORIZATION', '').split('Bearer ')[1]
         except:
-            print("wrong http header or websocket query_string, token retrived:", token)
+            print("wrong http header or websocket query_string, token retrived, request meta: ", request.META)
             return None
         try:
             jwks_url =  get_jwks_url("https://key.mythictable.com/auth/realms/MythicTable") # the issuer is not in the header of the token
