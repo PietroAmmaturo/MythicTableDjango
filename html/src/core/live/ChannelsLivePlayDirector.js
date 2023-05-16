@@ -29,7 +29,7 @@ class LivePlayDirector {
         this.connection = new WebSocketBridge();
         this.connection.addEventListener(
             'message',
-            function(event) {
+            function (event) {
                 console.log('message recived', event.data);
                 switch (event.data.type) {
                     case 'websocket_accept':
@@ -169,6 +169,10 @@ class LivePlayDirector {
         return await this.connection.send({ type: 'draw_line', payload: payload });
     }
 
+    onObjectRemoved(collection, id) {
+        this.store.dispatch('collections/onRemoved', { collection, id });
+    }
+
     onLineDrawn(line) {
         this.store.dispatch('drawing/lineDrawReceived', { line });
     }
@@ -214,6 +218,30 @@ class LivePlayDirector {
         } else {
             this.chatPage = 0;
         }
+    }
+
+
+
+    /* Theese functions are actually never used, bot they stay here for retrocompatibility and extensions */
+    /* the backend never sends messages that trigger theese */
+    async onCharacterAdded(characterDto) {
+        this.store.dispatch('gamestate/entities/load', [characterDto]);
+        await Asset.loadAll([characterDto]);
+    }
+    onCharacterRemoved(characterId) {
+        const patch = { op: 'remove', path: `/entities/${characterId}` };
+        console.log('onCharRemoved');
+        this.store.dispatch('gamestate/patch', patch);
+        this.store.dispatch('gamestate/entities/remove', characterId);
+    }
+    /* the frontend never fires events that trigger theese */
+    async addCharacter(image, pos, mapId) {
+        const request = { campaignId: this.sessionId, x: pos.q, y: pos.r, image, mapId };
+        console.log(request)
+    }
+    async removeCharacter(characterId) {
+        const request = { campaignId: this.sessionId, characterId: characterId };
+        console.log(request)
     }
 }
 
