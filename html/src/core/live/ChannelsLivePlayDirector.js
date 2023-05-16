@@ -29,7 +29,7 @@ class LivePlayDirector {
         this.connection = new WebSocketBridge();
         this.connection.addEventListener(
             'message',
-            function (event) {
+            function(event) {
                 console.log('message recived', event.data);
                 switch (event.data.type) {
                     case 'websocket_accept':
@@ -185,10 +185,6 @@ class LivePlayDirector {
         this.store.dispatch('collections/onAdded', { collection, item: item });
     }
 
-    onObjectRemoved(collection, id) {
-        this.store.dispatch('collections/onRemoved', { collection, id });
-    }
-
     async postloadMaps(maps) {
         const images = getAllImages(maps);
         await Asset.loadAll(images);
@@ -220,8 +216,6 @@ class LivePlayDirector {
         }
     }
 
-
-
     /* Theese functions are actually never used, bot they stay here for retrocompatibility and extensions */
     /* the backend never sends messages that trigger theese */
     async onCharacterAdded(characterDto) {
@@ -237,11 +231,11 @@ class LivePlayDirector {
     /* the frontend never fires events that trigger theese */
     async addCharacter(image, pos, mapId) {
         const request = { campaignId: this.sessionId, x: pos.q, y: pos.r, image, mapId };
-        console.log(request)
+        console.log(request);
     }
     async removeCharacter(characterId) {
         const request = { campaignId: this.sessionId, characterId: characterId };
-        console.log(request)
+        console.log(request);
     }
 }
 
