@@ -1,0 +1,52 @@
+version: '3'
+services:
+  django-server:
+    build:
+      context: ./django_server
+      dockerfile: Dockerfile
+    ports:
+      - '5001:5001'
+    dns:
+      - 8.8.8.8
+    environment:
+      - MONGODB_HOST=mongodb://admin:abc123!@mongo-database:27017
+      - MONGODB_DB_NAME=MythicTableDjango
+      - ALLOWED_HOSTS=vue-frontend,django-server,localhost,127.0.0.1
+    container_name: django-server
+    networks:
+      - mythic-table-network
+
+  mongo-database:
+    build:
+      context: ./mongo_database
+      dockerfile: Dockerfile
+    container_name: mongo-database
+    ports:
+      - '27017-27019:27017-27019'
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=abc123!
+      - MONGO_INITDB_DATABASE=MythicTableDjango
+    volumes:
+      - mongodata:/data/db
+    networks:
+      - mythic-table-network
+
+  vue-frontend:
+    build:
+      context: ./vue_frontend
+      dockerfile: Dockerfile
+    container_name: vue-frontend
+    ports:
+      - '5000:5000'
+    environment:
+      - FRONTEND_PORT=5000
+      - SERVER_URL=http://django-server:5001
+    networks:
+      - mythic-table-network
+
+networks:
+  mythic-table-network:
+
+volumes:
+  mongodata:

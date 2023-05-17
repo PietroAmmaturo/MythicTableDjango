@@ -2,9 +2,9 @@
 FROM python:3.9.2
 
 # Set environment variables for Python and Docker
-ENV MONGODB_HOST='mongodb://admin:abc123!@mongodb:27017'
+ENV MONGODB_HOST='mongodb://admin:abc123!@localhost:27017'
 ENV MONGODB_DB_NAME='MythicTableDjango'
-
+ENV ALLOWED_HOSTS='localhost,127.0.0.1'
 # Set the working directory in the container
 WORKDIR /code
 

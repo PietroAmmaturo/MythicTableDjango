@@ -30,10 +30,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'user-files/')
 MONGODB_HOST = os.environ.get('MONGODB_HOST', 'mongodb://admin:abc123!@localhost')  # MongoDB connection host
 MONGODB_DB_NAME = os.environ.get('MONGODB_DB_NAME', 'MythicTableDjango')
 
+#url for openid authentication
+MTT_AUTH_URL = "https://key.mythictable.com/auth/realms/MythicTable"
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',') if os.environ.get('ALLOWED_HOSTS') else ['*']
 
 APPEND_SLASH=False
 

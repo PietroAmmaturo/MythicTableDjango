@@ -4,6 +4,7 @@ import jwt;
 import requests
 from django.contrib.auth import get_user_model
 from rest_framework.authentication import BasicAuthentication
+from django.conf import settings
 
 def get_jwks_url(issuer_url):
     well_known_url = issuer_url + "/.well-known/openid-configuration"
@@ -39,9 +40,9 @@ class AuthenticationBackend(BasicAuthentication):
             print("wrong http header or websocket query_string, token retrived, request meta: ", request.META)
             return None
         try:
-            jwks_url =  get_jwks_url("https://key.mythictable.com/auth/realms/MythicTable") # the issuer is not in the header of the token
+            jwks_url =  get_jwks_url(settings.MTT_AUTH_URL) # the issuer is not in the header of the token
             decoded = decode_and_validate_token(token, jwks_url)
-            userinfo_url =  get_userinfo_url("https://key.mythictable.com/auth/realms/MythicTable") # the issuer is not in the header of the token
+            userinfo_url =  get_userinfo_url(settings.MTT_AUTH_URL) # the issuer is not in the header of the token
         except:
             print("one or more wrong urls", jwks_url, userinfo_url)
             return None
