@@ -124,7 +124,7 @@ Then you will login using:
 1. Create the containers and the network
    1. `cd $HOME/src`
    2. `git clone https://github.com/PietroAmmaturo/MythicTableDjango.git`
-   3. `docker-compose up -g`
+   3. `docker-compose up -d`
    4. `go to: http://localhost:5000/`
 2. Enjoy!
 
