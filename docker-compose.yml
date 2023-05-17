@@ -12,6 +12,7 @@ services:
       - MONGODB_HOST=mongodb://admin:abc123!@mongo-database:27017
       - MONGODB_DB_NAME=MythicTableDjango
       - ALLOWED_HOSTS=vue-frontend,django-server,localhost,127.0.0.1
+      - SERVER_URL=http://django-server:5001
     container_name: django-server
     networks:
       - mythic-table-network

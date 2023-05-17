@@ -26,6 +26,9 @@ SECRET_KEY = 'e@1+z5b@nq#o9789q%_(@9@1+jy&1=@1x##q)zfyx@n$g8os41'
 MEDIA_URL = '/user-files/' 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'user-files/') 
 
+#Add the base server url, this is useful for file storage (see stores.py)
+SERVER_URL = 'http://localhost:5001'
+
 #connection string
 MONGODB_HOST = os.environ.get('MONGODB_HOST', 'mongodb://admin:abc123!@localhost')  # MongoDB connection host
 MONGODB_DB_NAME = os.environ.get('MONGODB_DB_NAME', 'MythicTableDjango')

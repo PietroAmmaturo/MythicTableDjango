@@ -7,7 +7,7 @@ from io import BytesIO
 from pathlib import Path
 from .models import File
 from django.core.files.uploadedfile import UploadedFile
-
+from django.conf import settings
 
 class IFileStore:
     def save_file(self, form_file: bytes, user_id: str) -> File:
@@ -18,7 +18,7 @@ class IFileStore:
 
 
 class LocalFileStore(IFileStore):
-    def __init__(self, path: str = "user-files", url_prefix: str = "http://localhost:5001/user-files/"):
+    def __init__(self, path: str = settings.MEDIA_ROOT, url_prefix: str = settings.SERVER_URL + settings.MEDIA_URL):
         self.path = path
         self.url_prefix = url_prefix
 
@@ -27,6 +27,7 @@ class LocalFileStore(IFileStore):
         file_path = os.path.join(self.path, file_name)
         FileWriter.create_directory(os.path.dirname(file_path))
         path = FileWriter.copy_to_file(form_file, file_path)
+        print(path)
         return {"reference": path, "url": self.url_prefix + file_name}
 
     def delete_files(self, files: list[File]) -> None:

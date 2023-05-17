@@ -5,6 +5,10 @@ FROM python:3.9.2
 ENV MONGODB_HOST='mongodb://admin:abc123!@localhost:27017'
 ENV MONGODB_DB_NAME='MythicTableDjango'
 ENV ALLOWED_HOSTS='localhost,127.0.0.1'
+
+ENV MEDIA_URL='/user-files/'
+ENV SERVER_URL='http://localhost:5001'
+
 # Set the working directory in the container
 WORKDIR /code
 

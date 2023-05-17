@@ -15,7 +15,7 @@ COPY . .
 
 # Set the environment variables
 ENV PORT=5000
-ENV DJANGO_SERVER_URL=http://127.0.0.1:5001
+ENV SERVER_URL=http://127.0.0.1:5001
 
 # Expose the port on which your application listens (if needed)
 EXPOSE 5000
