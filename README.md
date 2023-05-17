@@ -121,7 +121,7 @@ Then you will login using:
 
 ## First time setup with docker
 
-1. Start the containers
+1. Create the containers and the network
    1. `cd $HOME/src`
    2. `git clone https://github.com/PietroAmmaturo/MythicTableDjango.git`
    3. `docker-compose up -g`
