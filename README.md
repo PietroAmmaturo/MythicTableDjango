@@ -1,10 +1,3 @@
-<div align="center">
-
-![Mythic Table](/docs/images/logo-long-black-white.png)
-
-</div>
-
-[![codecov](https://codecov.io/gl/mythicteam/mythictable/branch/main/graph/badge.svg?token=T71WDHV4QZ)](https://codecov.io/gl/mythicteam/mythictable)
 
 # Mythic Table
 
@@ -17,19 +10,20 @@ If you are a developer wishing to extend or improve this project here is everyth
 ## First time setup on local
 
 1. Install node.js version 16 using [nvm](https://github.com/nvm-sh/nvm), Visual Studio Installer, or download a manual installer from [nodejs.org](https://nodejs.org/en/download/) (frontend)
-2. Start the main service
+2. Install python3 (python:3.9.2 or later)
+3. Start the main service
    1. `cd $HOME/src`
    2. `git clone https://github.com/PietroAmmaturo/MythicTableDjango.git`
    3. `cd mythictable/django_server/MythicTable`
    4. `pip3 install -r requirements.txt`
    5. `python3 manage.py runserver 5001`
-3. Start Mythic Table's Frontend
+4. Start Mythic Table's Frontend
    1. `cd $HOME/src`
    2. `cd mythictable/html`
    3. Optional: if you installed node using `nvm` (see above) then you should run `nvm use` to switch to the correct node version
    4. `npm install`
    5. `npm run start`
-4. Enjoy!
+5. Enjoy!
 
 ## Second time and onward
 
