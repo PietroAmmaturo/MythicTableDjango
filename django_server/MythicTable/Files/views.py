@@ -28,7 +28,18 @@ class FileProviderView(LocalFileStoreView):
         self.profile_provider = profile_provider or MongoDbProfileProvider(self.client, self.db_name)
 
 class FileListView(FileProviderView):
-    def get(self, request, path=None, format=None):
+    def get(self, request, path=None):
+        """
+        Get a list of files.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+            path (Optional[str]): The path to filter files. If not provided, all files will be returned.
+            format (Optional[str]): The format of the response.
+
+        Returns:
+            Response: The response containing the serialized files.
+        """
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(self.profile_provider.get_by_user_id(user_id)._id)
         if path:
@@ -39,6 +50,15 @@ class FileListView(FileProviderView):
         return Response(serializer.data)
     
     def post(self, request):
+        """
+        Upload files.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+
+        Returns:
+            Response: The response containing information about the uploaded files.
+        """
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(self.profile_provider.get_by_user_id(user_id)._id)
         path = request.query_params.get('path')
@@ -70,6 +90,16 @@ class FileListView(FileProviderView):
     
 class FileView(FileProviderView):
     def get(self, request, fileId=None):
+        """
+        Get a file by ID.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+            fileId (Optional[str]): The ID of the file.
+
+        Returns:
+            Response: The response containing the serialized file.
+        """
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(self.profile_provider.get_by_user_id(user_id)._id)
         file = self.file_provider.get(fileId, profile_id)
@@ -77,6 +107,16 @@ class FileView(FileProviderView):
         return Response(serializer.data)
     
     def delete(self, request, fileId=list[str]):
+        """
+        Delete files.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+            fileId (List[str]): A list of file IDs to delete.
+
+        Returns:
+            Response: The response containing information about the deleted files.
+        """
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(self.profile_provider.get_by_user_id(user_id)._id)
         files_to_delete = []

@@ -22,6 +22,19 @@ class CollectionProviderView(AuthorizedView):
 
 class CollectionView(CollectionProviderView):
     def get(self, request, collection):
+        """
+        Retrieve a list of items from a collection.
+
+        Args:
+            request: The HTTP request object.
+            collection: The name of the collection.
+
+        Returns:
+            A Response object containing the list of items.
+
+        Raises:
+            Exception: If an error occurs during retrieval.
+        """
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(self.profile_provider.get_by_user_id(user_id=user_id)._id)
         try:
@@ -31,6 +44,19 @@ class CollectionView(CollectionProviderView):
             return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def post(self, request, collection):
+        """
+        Create a new item in a collection.
+
+        Args:
+            request: The HTTP request object.
+            collection: The name of the collection.
+
+        Returns:
+            A Response object containing the created item.
+
+        Raises:
+            Exception: If an error occurs during creation.
+        """
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(self.profile_provider.get_by_user_id(user_id=user_id)._id)
         try:
@@ -42,6 +68,20 @@ class CollectionView(CollectionProviderView):
         
 class CollectionProfileView(CollectionProviderView):
     def put(self, request, collection, profileId):
+        """
+        Update an item in a collection associated with a profile.
+
+        Args:
+            request: The HTTP request object.
+            collection: The name of the collection.
+            profileId: The ID of the profile.
+
+        Returns:
+            A Response object containing the updated item.
+
+        Raises:
+            Exception: If an error occurs during update.
+        """
         patch = request.data
         result = self.collection_provider.update(collection, str(profileId), patch)
         if result > 0:
@@ -49,6 +89,20 @@ class CollectionProfileView(CollectionProviderView):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, collection, profileId):
+        """
+        Delete an item from a collection associated with a profile.
+
+        Args:
+            request: The HTTP request object.
+            collection: The name of the collection.
+            profileId: The ID of the profile.
+
+        Returns:
+            A Response object containing the number of deleted items.
+
+        Raises:
+            Exception: If an error occurs during deletion.
+        """
         number_deleted = self.collection_provider.delete(collection, str(profileId))
         if number_deleted > 0:
             return Response({"numberDeleted": number_deleted})
@@ -56,11 +110,39 @@ class CollectionProfileView(CollectionProviderView):
     
 class CollectionCampaignView(CollectionProviderView):
     def get(self, request, collection, campaignId):
+        """
+        Retrieve a list of items from a collection associated with a campaign.
+
+        Args:
+            request: The HTTP request object.
+            collection: The name of the collection.
+            campaignId: The ID of the campaign.
+
+        Returns:
+            A Response object containing the list of items.
+
+        Raises:
+            Exception: If an error occurs during retrieval.
+        """
         UserIsMemberOfCampaign().has_permission(request, self)
         result = self.collection_provider.get_list_by_campaign(collection, str(campaignId))
         return Response(result)
     
     def put(self, request, collection, campaignId):
+        """
+        Create a new item in a collection associated with a campaign.
+
+        Args:
+            request: The HTTP request object.
+            collection: The name of the collection.
+            campaignId: The ID of the campaign.
+
+        Returns:
+            A Response object containing the created item.
+
+        Raises:
+            Exception: If an error occurs during creation.
+        """
         UserIsMemberOfCampaign().has_permission(request, self)
         patch = request.data
         result = self.collection_provider.update(collection, str(campaignId), patch)
@@ -69,6 +151,20 @@ class CollectionCampaignView(CollectionProviderView):
         return Response(status=status.HTTP_400_BAD_REQUEST)
     
     def post(self, request, collection, campaignId):
+        """
+        Create a new item in a collection associated with a campaign.
+
+        Args:
+            request: The HTTP request object.
+            collection: The name of the collection.
+            campaignId: The ID of the campaign.
+
+        Returns:
+            A Response object containing the created item.
+
+        Raises:
+            Exception: If an error occurs during creation.
+        """
         UserIsMemberOfCampaign().has_permission(request, self)
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(self.profile_provider.get_by_user_id(user_id=user_id)._id)
@@ -80,6 +176,21 @@ class CollectionCampaignView(CollectionProviderView):
             return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
     def delete(self, request, collection, campaignId, itemId):
+        """
+        Delete an item from a collection associated with a campaign.
+
+        Args:
+            request: The HTTP request object.
+            collection: The name of the collection.
+            campaignId: The ID of the campaign.
+            itemId: The ID of the item.
+
+        Returns:
+            A Response object containing the result of the deletion.
+
+        Raises:
+            Exception: If an error occurs during deletion.
+        """
         UserIsMemberOfCampaign().has_permission(request, self)
         try:
             data = self.collection_provider.delete_by_campaign(collection, str(campaignId), str(itemId))

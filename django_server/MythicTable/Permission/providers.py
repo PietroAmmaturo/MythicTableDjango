@@ -11,6 +11,20 @@ class MongoDbPermissionProvider(MongoDbProvider):
         self.permission_collection = self.db['permissions']
 
     def create(self, campaign_id: str, object_id: str, permission: Permission) -> Permission:
+        """
+        Create a permission.
+
+        Args:
+            campaign_id (str): The ID of the campaign.
+            object_id (str): The ID of the object.
+            permission (Permission): The permission to create.
+
+        Returns:
+            Permission: The created permission.
+
+        Raises:
+            PermissionException: If the permission creation fails.
+        """
         if (not campaign_id) or len(campaign_id) == 0:
             message = f"Could not create permission invalid campaign id: {campaign_id}"
             raise PermissionException(message)
@@ -19,7 +33,6 @@ class MongoDbPermissionProvider(MongoDbProvider):
             raise PermissionException(message)
         permission.campaign = campaign_id
         permission.object = object_id
-        # Serialization
         serializer = PermissionDBSerializer(permission)
         newProfile = serializer.data
         del newProfile['_id']
@@ -31,30 +44,66 @@ class MongoDbPermissionProvider(MongoDbProvider):
         return permission
     
     def get_list(self, campaign_id: str) -> list[Permission]:
+        """
+        Get a list of permissions for a given campaign ID.
+
+        Args:
+            campaign_id (str): The ID of the campaign.
+
+        Returns:
+            list[Permission]: The list of permissions.
+
+        Raises:
+            PermissionException: If the permissions are not found.
+        """
         filter = {"Campaign" : campaign_id}
         dtos = self.permission_collection.find(filter)
         if dtos is None:
             message = f"Cannot find permissions for campaign: {campaign_id}"
             raise PermissionException(message)
-        # Deserialization
         serializer = PermissionDBSerializer(data=dtos, many=True)
         if serializer.is_valid():
             permissions = serializer.create(serializer.validated_data)
             return permissions
         
     def get(self, campaign_id: str, object_id: str) -> Permission:
+        """
+        Get a permission by campaign ID and object ID.
+
+        Args:
+            campaign_id (str): The ID of the campaign.
+            object_id (str): The ID of the object.
+
+        Returns:
+            Permission: The retrieved permission.
+
+        Raises:
+            PermissionException: If the permission is not found.
+        """
         filter = {"$and": [{"Campaign": campaign_id}, {"Object": object_id}]}
         dto = self.permission_collection.find_one(filter)
         if dto is None:
             message = f"Cannot find permission for item: {object_id} in campaign: {campaign_id}"
             raise PermissionException(message)
-        # Deserialization
         serializer = PermissionDBSerializer(data=dto)
         if serializer.is_valid():
             permission = serializer.create(serializer.validated_data)
             return permission
         
     def update(self, campaign_id: str, permission: Permission) -> Permission:
+        """
+        Update a permission.
+
+        Args:
+            campaign_id (str): The ID of the campaign.
+            permission (Permission): The permission to update.
+
+        Returns:
+            Permission: The updated permission.
+
+        Raises:
+            PermissionException: If the permission update fails.
+        """
         if (not permission._id):
             message = f"Could not update permission. Missing Id.: {permission}"
             raise PermissionException(message)
@@ -67,6 +116,19 @@ class MongoDbPermissionProvider(MongoDbProvider):
         return permission
     
     def delete(self, campaign_id: str, permission_id: str) -> int:
+        """
+        Delete a permission.
+
+        Args:
+            campaign_id (str): The ID of the campaign.
+            permission_id (str): The ID of the permission.
+
+        Returns:
+            int: The number of deleted permissions.
+
+        Raises:
+            PermissionException: If the permission deletion fails.
+        """
         filter = {"$and": [{"Campaign": campaign_id}, {"_id": permission_id}]}
         result = self.permission_collection.delete_one(filter)
         if (not result.acknowledged):
@@ -77,8 +139,20 @@ class MongoDbPermissionProvider(MongoDbProvider):
             raise PermissionException(message)
         return result.deleted_count
 
-    # is_authorized is strange
+    # is_authorized is legacy, this is how permissions were handled in the legacy code, actually permissions are never created, deleted or modified at all
+    # expanding the permission system might be a possible extension of this project
     def is_authorized(self, profile_id: str, campaign_id: str, object_id: str) -> bool:
+        """
+        Check if a user is authorized for a permission.
+
+        Args:
+            profile_id (str): The ID of the profile.
+            campaign_id (str): The ID of the campaign.
+            object_id (str): The ID of the object.
+
+        Returns:
+            bool: True if the user is authorized, False otherwise.
+        """
         try:
             permission = self.get(campaign_id, object_id)
             return permission != None
