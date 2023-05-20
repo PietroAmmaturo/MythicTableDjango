@@ -28,18 +28,45 @@ class MeView(ProfileProviderView):
     API view for the authenticated user's profile.
     """
     def get(self, request, format=None):
+        """
+        Retrieve the profile of the authenticated user.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+            format (str, optional): The format of the response.
+
+        Returns:
+            Response: The serialized profile data.
+
+        Raises:
+            PermissionDenied: If the user is not authenticated.
+        """
         user_id = request.session.get("userinfo", {}).get("sub")
         if not user_id:
             raise PermissionDenied("User is not authenticated")
         try:
             profile = self.profile_provider.get_by_user_id(user_id)
         except ProfileNotFoundException:
+            # Create a default profile if not found
             profile = self.create_default_profile(user_id, request.session.get("userinfo", {}))
         self.update_groups(request, profile)
         serializer = ProfileAPISerializer(profile)
         return Response(serializer.data)
 
     def create_default_profile(self, user_id, userinfo):
+        """
+        Create a default profile and tutorial campaign for the user if not found.
+
+        Args:
+            user_id (str): The ID of the user.
+            userinfo (dict): The user information.
+
+        Returns:
+            Profile: The created default profile.
+
+        Raises:
+            ProfileInvalidException: If the default profile is not valid.
+        """
         groups = userinfo.get("groups", [])
         serializer = ProfileAPISerializer(ProfileUtils.create_default_profile(user_id, userinfo.get("preferred_username"), groups))
         serializer = ProfileAPISerializer(data=serializer.data)
@@ -51,6 +78,16 @@ class MeView(ProfileProviderView):
         return profile
 
     def update_groups(self, request, profile):
+        """
+        Update the groups of the profile if they have changed.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+            profile (Profile): The profile object.
+
+        Returns:
+            None
+        """
         groups = request.session.get("userinfo", {}).get("groups", [])
         if not groups:
             return
@@ -64,13 +101,38 @@ class ProfileView(ProfileProviderView):
     API view for a single profile by ID.
     """
     def get(self, request, profileId=None, format=None):
+        """
+        Retrieve a single profile by its ID.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+            profileId (str): The ID of the profile.
+            format (str, optional): The format of the response.
+
+        Returns:
+            Response: The serialized profile data.
+
+        Raises:
+            ProfileNotFoundException: If the profile is not found.
+        """        
         profile = self.profile_provider.get(str(profileId))
         serializer = ProfileAPISerializer(profile)
         return Response(serializer.data)
 
 class ProfileListView(ProfileProviderView):
     def get(self, request):
-        # userId is mandatory even if thoose are actually profile Id
+        """
+        Retrieve multiple profiles by their IDs.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+
+        Returns:
+            Response: The serialized profile data.
+
+        Raises:
+            None
+        """
         if bool(request.query_params):
             profileIds = request.query_params.getlist('userId')
             profiles = self.get(profileIds)
@@ -80,6 +142,19 @@ class ProfileListView(ProfileProviderView):
             return Response([])
     
     def put(self, request):
+        """
+        Update a profile.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+
+        Returns:
+            Response: The serialized updated profile data.
+
+        Raises:
+            ProfileNotAuthorizedException: If the user is not authorized to update the profile.
+            ProfileInvalidException: If the provided profile data is not valid.
+        """
         user_id = request.session["userinfo"]["sub"]
         groups = request.session["userinfo"]["groups"]
         serializer = ProfileAPISerializer(data=request.data)

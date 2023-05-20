@@ -12,13 +12,18 @@ class MongoDbCampaignProvider(MongoDbProvider):
         self.campaign_collection = self.db['campaign']
         self.campaign_messages_collection = self.db['campaign-messages']
 
-    # get using the profile
     def get_all(self, profile_id: str) -> list[Campaign]:
-        # Define the filter
+        """
+        Retrieve all campaigns associated with a profile.
+
+        Args:
+            profile_id: The ID of the profile.
+
+        Returns:
+            List of Campaign objects.
+        """
         filter = {"$or": [{"Owner": profile_id}, {"Players.Name": profile_id}]}
-        # Find the first document that matches the filter
         dtos = [doc for doc in self.campaign_collection.find(filter)]
-        # Deserialization
         serializer = CampaignDBSerializer(data=dtos, many=True)
         if not serializer.is_valid():
             message = f"The campaigns associated with profile: {profile_id} stored in the DB are not valid: {serializer.errors}"
@@ -26,23 +31,36 @@ class MongoDbCampaignProvider(MongoDbProvider):
         campaign = serializer.create(serializer.validated_data)
         return campaign
 
-    # get using the mongoDB Object id
     def get(self, campaign_id: str) -> Campaign:
-        # Define the filter
+        """
+        Retrieve a campaign by ID.
+
+        Args:
+            campaign_id: The ID of the campaign.
+
+        Returns:
+            Campaign object.
+        """
         filter = {"_id": ObjectId(campaign_id)}
-        # Find the first document that matches the filter
         dto = self.campaign_collection.find_one(filter)
         if dto is None:
             message = f"Cannot find campaign: {campaign_id}"
             raise CampaignNotFoundException(message)
-        # Deserialization
         serializer = CampaignDBSerializer(data=dto)
         if serializer.is_valid():
             campaign = serializer.create(serializer.validated_data)
             return campaign
 
     def create(self, campaign: Campaign) -> Campaign:
-        # Serialization
+        """
+        Create a new campaign and its associated campaign-messages.
+
+        Args:
+            campaign: The Campaign object to create.
+
+        Returns:
+            Created Campaign object.
+        """
         serializer = CampaignDBSerializer(campaign)
         new_campaign = serializer.data
         del new_campaign['_id']
@@ -74,19 +92,42 @@ class MongoDbCampaignProvider(MongoDbProvider):
         return campaign
 
     def get_by_join_id(self, join_id: str) -> Campaign:
+        """
+        Retrieve a campaign by its join ID.
+
+        Args:
+            join_id: The join ID of the campaign.
+
+        Returns:
+            The Campaign object.
+
+        Raises:
+            CampaignNotFoundException: If the campaign is not found.
+        """
         filter = {"JoinId": join_id}
-        # Find the first document that matches the filter
         dto = self.campaign_collection.find_one(filter)
         if dto is None:
             message = f"Cannot find campaign: {join_id}"
             raise CampaignNotFoundException(message)
-        # Deserialization
         serializer = CampaignDBSerializer(data=dto)
         if serializer.is_valid():
             campaign = serializer.create(serializer.validated_data)
             return campaign
 
     def update(self, campaign_id: str, campaign: Campaign) -> Campaign:
+        """
+        Update a campaign.
+
+        Args:
+            campaign_id: The ID of the campaign.
+            campaign: The updated Campaign object.
+
+        Returns:
+            The updated Campaign object.
+
+        Raises:
+            CampaignInvalidException: If the campaign is null or does not have an ID.
+        """
         if campaign is None:
             raise CampaignInvalidException("The campaign is null")
         if campaign_id is None or len(campaign_id) == 0:
@@ -100,8 +141,19 @@ class MongoDbCampaignProvider(MongoDbProvider):
             raise CampaignInvalidException(message)
         return campaign
 
-    #TODO: upon deletion, campaigns must delete their messages collection and all associated collections
     def delete(self, campaign_id: str) -> Campaign:
+        """
+        Delete a campaign and all the collections associated with it.
+
+        Args:
+            campaign_id: The ID of the campaign to delete.
+
+        Returns:
+            The deleted Campaign object.
+
+        Raises:
+            CampaignInvalidException: If the campaign or its messages cannot be deleted.
+        """
         result = self.campaign_collection.delete_one(
             {"_id": ObjectId(campaign_id)})
         if (not result.acknowledged):
@@ -114,6 +166,18 @@ class MongoDbCampaignProvider(MongoDbProvider):
             raise CampaignInvalidException(message)
 
     def get_players(self, campaign_id: str) -> list[Player]:
+        """
+        Retrieve the players of a campaign.
+
+        Args:
+            campaign_id: The ID of the campaign.
+
+        Returns:
+            A list of Player objects.
+
+        Raises:
+            CampaignNotFoundException: If the campaign is not found.
+        """
         try:
             campaign = self.get(campaign_id)
             return campaign.players
@@ -122,12 +186,24 @@ class MongoDbCampaignProvider(MongoDbProvider):
                 f"Get Players. Cannot find campaign with join id {campaign_id}")
 
     def add_player(self, campaign_id: str, player: Player) -> Campaign:
+        """
+        Add a player to a campaign.
+
+        Args:
+            campaign_id: The ID of the campaign.
+            player: The Player object to add.
+
+        Returns:
+            The updated Campaign object.
+
+        Raises:
+            CampaignNotFoundException: If the campaign is not found.
+            CampaignAddPlayerException: If the player is already in the campaign.
+        """
         campaign = self.get(campaign_id)
-        # Check if player is already in
         if any(p["name"] == player.name for p in campaign.players):
             raise CampaignAddPlayerException(
                 f"The player '{player.name}' is already in campaign {campaign_id}")
-        # Add player to the array
         serializer = PlayerDBSerializer(player)
         new_player = serializer.data
         del new_player['_id']
@@ -135,7 +211,6 @@ class MongoDbCampaignProvider(MongoDbProvider):
         new_player["_id"] = ObjectId()
         result = self.campaign_collection.update_one({"_id": ObjectId(campaign_id)}, {
             "$push": {"Players": new_player}})
-        # if nothing has been modified
         if result.modified_count == 0:
             raise CampaignAddPlayerException(
                 f"Failed to add player '{player.name}' to campaign {campaign_id}, result: {result}")
@@ -143,6 +218,20 @@ class MongoDbCampaignProvider(MongoDbProvider):
         return campaign
 
     def remove_player(self, campaign_id: str, player: Player) -> Campaign:
+        """
+        Remove a player from a campaign.
+
+        Args:
+            campaign_id: The ID of the campaign.
+            player: The Player object to remove.
+
+        Returns:
+            The updated Campaign object.
+
+        Raises:
+            CampaignNotFoundException: If the campaign is not found.
+            CampaignRemovePlayerException: If the player is not in the campaign.
+        """
         try:
             campaign = self.get(campaign_id)
             number_removed = len([p for p in campaign.players if p["name"] == player.name])
@@ -155,14 +244,25 @@ class MongoDbCampaignProvider(MongoDbProvider):
                 f"Remove Player. Cannot find campaign of id {campaign_id}")
 
     def get_messages(self, campaign_id: str, page_size: int, page: int) -> list[Message]:
-        # Define the filter
+        """
+        Retrieve messages from a campaign.
+
+        Args:
+            campaign_id: The ID of the campaign.
+            page_size: The number of messages per page.
+            page: The page number to retrieve.
+
+        Returns:
+            A list of Message objects.
+
+        Raises:
+            CampaignNotFoundException: If the campaign or its messages are not found.
+        """
         filter = {"_id": ObjectId(campaign_id)}
-        # Find the first document that matches the filter
         dto = self.campaign_messages_collection.find_one(filter)
         if dto is None:
             message = f"Cannot find campaign messages: {campaign_id}"
             raise CampaignNotFoundException(message)
-        # Deserialization
         serializer = MessageContainerDBSerializer(data=dto)
         if not serializer.is_valid():
             message = f"The campaign message container for campaign: {campaign_id} stored in the DB is not valid: {serializer.errors}"
@@ -171,7 +271,6 @@ class MongoDbCampaignProvider(MongoDbProvider):
             serializer.validated_data)
         messages = campaign_message_container.messages
         initial_index = len(messages) - (page_size * page)
-        # If there are no messages in a page, return empty list
         if initial_index <= -page_size:
             return []
         elif initial_index < 0:
@@ -181,7 +280,20 @@ class MongoDbCampaignProvider(MongoDbProvider):
         return messages
 
     def add_message(self, campaign_id: str, message: Message) -> Message:
-        # Add player to the array
+        """
+        Add a message to a campaign.
+
+        Args:
+            campaign_id: The ID of the campaign.
+            message: The Message object to add.
+
+        Returns:
+            The added Message object.
+
+        Raises:
+            CampaignNotFoundException: If the campaign is not found.
+            CampaignAddPlayerException: If the message could not be added.
+        """
         serializer = MessageDBSerializer(message)
         new_message = serializer.data
         del new_message['_id']
@@ -189,7 +301,6 @@ class MongoDbCampaignProvider(MongoDbProvider):
         new_message['_id'] = ObjectId()
         result = self.campaign_messages_collection.update_one({"_id": ObjectId(campaign_id)}, {
             "$push": {"Messages": new_message}})
-        # if nothing has been modified
         if result.modified_count == 0:
             raise CampaignAddPlayerException(
                 f"Failed to add message '{message.name}' to campaign {campaign_id}, result: {result}")

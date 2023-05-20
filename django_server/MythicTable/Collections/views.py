@@ -1,22 +1,22 @@
 from .providers import MongoDbCollectionProvider
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from MythicTable.views import AuthorizedView
 from Campaign.permissions import UserIsMemberOfCampaign
-from Campaign.providers import MongoDbCampaignProvider
 from Profile.providers import MongoDbProfileProvider
-from rest_framework.decorators import permission_classes
+from Campaign.providers import MongoDbCampaignProvider
 
 class CollectionProviderView(AuthorizedView):
     client = None
     db_name = None
     collection_provider = None
     profile_provider=None
-    def __init__(self, profile_provider=None, collection_provider=None, client=None, db_name=None):
+    campaign_provider = None
+    def __init__(self, profile_provider=None, campaign_provider = None, collection_provider=None, client=None, db_name=None):
         super().__init__()
         self.client = client
         self.db_name = db_name
+        self.campaign_provider = campaign_provider or MongoDbCampaignProvider(self.client, self.db_name)
         self.collection_provider = collection_provider or MongoDbCollectionProvider(self.client, self.db_name)
         self.profile_provider = profile_provider or MongoDbProfileProvider(self.client, self.db_name)
 
@@ -55,21 +55,21 @@ class CollectionProfileView(CollectionProviderView):
         return Response(status=status.HTTP_400_BAD_REQUEST)
     
 class CollectionCampaignView(CollectionProviderView):
-    @permission_classes([UserIsMemberOfCampaign])
     def get(self, request, collection, campaignId):
+        UserIsMemberOfCampaign().has_permission(request, self)
         result = self.collection_provider.get_list_by_campaign(collection, str(campaignId))
         return Response(result)
     
-    @permission_classes([UserIsMemberOfCampaign])
     def put(self, request, collection, campaignId):
+        UserIsMemberOfCampaign().has_permission(request, self)
         patch = request.data
         result = self.collection_provider.update(collection, str(campaignId), patch)
         if result > 0:
             return Response(self.collection_provider.get(collection, str(campaignId)))
         return Response(status=status.HTTP_400_BAD_REQUEST)
     
-    @permission_classes([UserIsMemberOfCampaign])
     def post(self, request, collection, campaignId):
+        UserIsMemberOfCampaign().has_permission(request, self)
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(self.profile_provider.get_by_user_id(user_id=user_id)._id)
         try:
@@ -79,8 +79,8 @@ class CollectionCampaignView(CollectionProviderView):
         except Exception as e:
             return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-    @permission_classes([UserIsMemberOfCampaign])
     def delete(self, request, collection, campaignId, itemId):
+        UserIsMemberOfCampaign().has_permission(request, self)
         try:
             data = self.collection_provider.delete_by_campaign(collection, str(campaignId), str(itemId))
             return Response(data, status=status.HTTP_201_CREATED)

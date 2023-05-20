@@ -6,11 +6,9 @@ from .utils import CampaignUtils
 from .permissions import UserIsMemberOfCampaign, UserOwnsCampaign
 from Profile.providers import MongoDbProfileProvider
 from MythicTable.views import AuthorizedView
-from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED
 from rest_framework.reverse import reverse
-from rest_framework.decorators import permission_classes
 
 
 class CampaignProviderView(AuthorizedView):
@@ -32,8 +30,20 @@ class CampaignProviderView(AuthorizedView):
             self.client, self.db_name)
 
     def get_current_user(self, request):
+        """
+        Retrieve the current user.
+
+        Args:
+            request: The request object.
+
+        Returns:
+            The current user.
+        
+        Raises:
+            CampaignAddPlayerException: If the profile ID of the user is not a valid player name.
+        """
         user_id = request.session["userinfo"]["sub"]
-        profile_id = str(self.profile_provider.get_by_user_id(user_id)._id)
+        profile_id = str(self.profile_provider.get_by_user_id(user_id)._id) #Improvment: use caching system to store profile_id in a cache and avoid DB lookup
         data = {"id": None, "name": profile_id}
         serializer = PlayerAPISerializer(data=data)
         if not serializer.is_valid():
@@ -45,6 +55,15 @@ class CampaignProviderView(AuthorizedView):
 
 class CampaignListView(CampaignProviderView):
     def get(self, request):
+        """
+        Retrieve all campaigns.
+
+        Args:
+            request: The request object.
+
+        Returns:
+            Response with the serialized campaigns.
+        """
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(self.profile_provider.get_by_user_id(user_id)._id)
         campaigns = self.campaign_provider.get_all(profile_id)
@@ -52,6 +71,18 @@ class CampaignListView(CampaignProviderView):
         return Response(serializer.data)
 
     def post(self, request):
+        """
+        Create a new campaign.
+
+        Args:
+            request: The request object.
+
+        Returns:
+            Response with the serialized created campaign.
+
+        Raises:
+            CampaignInvalidException: If the provided campaign is not valid.
+        """
         user_id = request.session["userinfo"]["sub"]
         serializer = CampaignAPISerializer(data=request.data)
         if not serializer.is_valid():
@@ -69,14 +100,37 @@ class CampaignListView(CampaignProviderView):
 
 
 class CampaignView(CampaignProviderView):
-    @permission_classes([UserIsMemberOfCampaign])
     def get(self, request, campaignId=None):
+        """
+        Retrieve a specific campaign.
+
+        Args:
+            request: The request object.
+            campaignId: The ID of the campaign.
+
+        Returns:
+            Response with the serialized campaign.
+        """
+        UserIsMemberOfCampaign().has_permission(request, self)
         campaign = self.campaign_provider.get(campaignId)
         serializer = CampaignAPISerializer(campaign)
         return Response(serializer.data)
 
-    @permission_classes([UserOwnsCampaign])
     def put(self, request, campaignId=None):
+        """
+        Update a specific campaign.
+
+        Args:
+            request: The request object.
+            campaignId: The ID of the campaign.
+
+        Returns:
+            Response with the serialized updated campaign.
+
+        Raises:
+            CampaignInvalidException: If the provided campaign is not valid.
+        """
+        UserOwnsCampaign().has_permission(request, self)
         user_id = request.session["userinfo"]["sub"]
         serializer = CampaignAPISerializer(data=request.data)
         if not serializer.is_valid():
@@ -87,22 +141,50 @@ class CampaignView(CampaignProviderView):
             self.campaign_provider.update(campaignId, campaign))
         return Response(serializer.data)
 
-    @permission_classes([UserOwnsCampaign])
     def delete(self, request, campaignId=None):
+        """
+        Delete a specific campaign.
+
+        Args:
+            campaignId: The ID of the campaign.
+
+        Returns:
+            Response with the serialized deleted campaign.
+        """
+        UserOwnsCampaign().has_permission(request, self)
         campaign = self.campaign_provider.get(campaignId)
         self.campaign_provider.delete(campaignId)
         serializer = CampaignAPISerializer(campaign)
         self.collection_provider.delete_all_by_campaign(campaignId)
         return Response(serializer.data)
 
-
 class CampaignJoinView(CampaignProviderView):
     def get(self, request, joinId=None):
+        """
+        Retrieve a specific campaign by join ID.
+
+        Args:
+            request: The request object.
+            joinId: The join ID of the campaign.
+
+        Returns:
+            Response with the serialized campaign.
+        """
         campaign = self.campaign_provider.get_by_join_id(joinId)
         serializer = CampaignAPISerializer(campaign)
         return Response(serializer.data)
 
     def put(self, request, joinId=None):
+        """
+        Join a specific campaign.
+
+        Args:
+            request: The request object.
+            joinId: The join ID of the campaign.
+
+        Returns:
+            Response with the serialized campaign.
+        """
         campaign = self.campaign_provider.get_by_join_id(joinId)
         serializer = CampaignAPISerializer(self.campaign_provider.add_player(
             campaign._id, self.get_current_user(request)))
@@ -110,8 +192,19 @@ class CampaignJoinView(CampaignProviderView):
 
 
 class CampaignLeaveView(CampaignProviderView):
-    @permission_classes([UserIsMemberOfCampaign])
     def put(self, request, campaignId, playerId):
+        """
+        Remove a player from a campaign.
+
+        Args:
+            request: The request object.
+            campaignId: The ID of the campaign.
+            playerId: The ID of the player.
+
+        Returns:
+            Response with the serialized campaign.
+        """
+        UserIsMemberOfCampaign().has_permission(request, self)
         player = self.get_current_user(request)
         campaign = self.campaign_provider.remove_player(campaignId, player)
         serializer = CampaignAPISerializer(campaign)
@@ -119,8 +212,21 @@ class CampaignLeaveView(CampaignProviderView):
 
 
 class CampaignForceLeaveView(CampaignProviderView):
-    @permission_classes([UserOwnsCampaign])
-    def put(self, campaignId, playerId):
+    def put(self, request, campaignId, playerId):
+        """
+        Forcefully remove a player from a campaign.
+
+        Args:
+            campaignId: The ID of the campaign.
+            playerId: The ID of the player.
+
+        Returns:
+            Response with the serialized campaign.
+
+        Raises:
+            CampaignInvalidException: If the provided player ID is not valid.
+        """
+        UserOwnsCampaign().has_permission(request, self)
         campaign = self.campaign_provider.get(campaignId)
         player_data = {"name": f"{playerId}"}
         serializer = PlayerAPISerializer(data=player_data)
@@ -134,8 +240,18 @@ class CampaignForceLeaveView(CampaignProviderView):
 
 
 class CampaignMessagesView(CampaignProviderView):
-    @permission_classes([UserIsMemberOfCampaign])
     def get(self, request, campaignId):
+        """
+        Retrieve messages of a campaign.
+
+        Args:
+            request: The request object.
+            campaignId: The ID of the campaign.
+
+        Returns:
+            Response with the serialized messages.
+        """
+        UserIsMemberOfCampaign().has_permission(request, self)
         messages = self.campaign_provider.get_messages(campaignId, int(
             request.query_params.get('pageSize', 50)), int(request.query_params.get('page', 1)))
         serializer = MessageAPISerializer(messages, many=True)
@@ -143,8 +259,17 @@ class CampaignMessagesView(CampaignProviderView):
 
 
 class CampaignPlayersView(CampaignProviderView):
-    @permission_classes([UserIsMemberOfCampaign])
-    def get(self, campaignId):
+    def get(self, request, campaignId):
+        """
+        Retrieve players of a campaign.
+
+        Args:
+            campaignId: The ID of the campaign.
+
+        Returns:
+            Response with the serialized players.
+        """
+        UserIsMemberOfCampaign().has_permission(request, self)
         players = self.campaign_provider.get_players(campaignId)
         serializer = MessageAPISerializer(players, many=True)
         return Response(serializer.data)

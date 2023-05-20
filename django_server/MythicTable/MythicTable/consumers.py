@@ -33,7 +33,7 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
     async def validate_campaign_member(self, campaign_id):
         campaign = self.campaign_provider.get(campaign_id)
         profile_id = str(self.profile_provider.get_by_user_id(self.scope["session"]["userinfo"]["sub"])._id)
-        if campaign.owner != profile_id and not any(player["name"] == profile_id for player in campaign.players):
+        if campaign.owner != profile_id and not any(player.name == profile_id for player in campaign.players):
             error_message = f"User: {profile_id} is not in Campaign: {campaign_id}"
             raise UnauthorizedException(error_message)
         

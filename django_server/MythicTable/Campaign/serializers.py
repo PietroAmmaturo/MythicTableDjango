@@ -65,6 +65,9 @@ class CampaignAPISerializer(serializers.ModelSerializer):
         if 'last_modified' not in instance_data or not instance_data['last_modified']:
             instance_data['last_modified'] = instance_data['created']
         campaign = Campaign(**instance_data)
+        players_data = instance_data.pop('players', None)
+        if players_data:
+            campaign.players = PlayerAPISerializer().create(players_data)
         return campaign
 
 class MessageAPISerializer(serializers.ModelSerializer):
@@ -107,7 +110,19 @@ class PlayerDBSerializer(serializers.ModelSerializer):
     class Meta:
         model = Player
         fields = ('_id', 'Name')
+        
+    def create(self, validated_data):
+        if isinstance(validated_data, list):
+            # If validated_data is a list, create an instance for each dictionary
+            return [self.create_instance(instance_data) for instance_data in validated_data]
+        else:
+            # If validated_data is not a list, create a single instance
+            return self.create_instance(validated_data)
 
+    def create_instance(self, instance_data):
+        player = Player(**instance_data)
+        return player
+    
 class CampaignDBSerializer(serializers.ModelSerializer):
     _id = ObjectIdDBField()
     JoinId = serializers.CharField(
@@ -138,6 +153,9 @@ class CampaignDBSerializer(serializers.ModelSerializer):
 
     def create_instance(self, instance_data):
         campaign = Campaign(**instance_data)
+        players_data = instance_data.pop('players', None)
+        if players_data:
+            campaign.players = PlayerDBSerializer().create(players_data)
         return campaign
 
 class MessageDBSerializer(serializers.ModelSerializer):
