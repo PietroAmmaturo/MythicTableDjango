@@ -35,6 +35,7 @@ class CollectionView(CollectionProviderView):
         Raises:
             Exception: If an error occurs during retrieval.
         """
+        # Extension: store user_id and profile_id with a caching system to avoid JWT authentication and DB Lookup every time a request is made
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(self.profile_provider.get_by_user_id(user_id=user_id)._id)
         try:
@@ -57,6 +58,7 @@ class CollectionView(CollectionProviderView):
         Raises:
             Exception: If an error occurs during creation.
         """
+        # Extension: store user_id and profile_id with a caching system to avoid JWT authentication and DB Lookup every time a request is made
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(self.profile_provider.get_by_user_id(user_id=user_id)._id)
         try:

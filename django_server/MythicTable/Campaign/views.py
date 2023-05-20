@@ -42,8 +42,9 @@ class CampaignProviderView(AuthorizedView):
         Raises:
             CampaignAddPlayerException: If the profile ID of the user is not a valid player name.
         """
+        # Extension: store user_id and profile_id with a caching system to avoid JWT authentication and DB Lookup every time a request is made
         user_id = request.session["userinfo"]["sub"]
-        profile_id = str(self.profile_provider.get_by_user_id(user_id)._id) #Improvment: use caching system to store profile_id in a cache and avoid DB lookup
+        profile_id = str(self.profile_provider.get_by_user_id(user_id)._id)
         data = {"id": None, "name": profile_id}
         serializer = PlayerAPISerializer(data=data)
         if not serializer.is_valid():
@@ -64,6 +65,7 @@ class CampaignListView(CampaignProviderView):
         Returns:
             Response with the serialized campaigns.
         """
+        # Extension: store user_id and profile_id with a caching system to avoid JWT authentication and DB Lookup every time a request is made
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(self.profile_provider.get_by_user_id(user_id)._id)
         campaigns = self.campaign_provider.get_all(profile_id)
@@ -83,13 +85,15 @@ class CampaignListView(CampaignProviderView):
         Raises:
             CampaignInvalidException: If the provided campaign is not valid.
         """
+        # Extension: store user_id and profile_id with a caching system to avoid JWT authentication and DB Lookup every time a request is made
         user_id = request.session["userinfo"]["sub"]
+        profile_id = str(self.profile_provider.get_by_user_id(user_id)._id)
         serializer = CampaignAPISerializer(data=request.data)
         if not serializer.is_valid():
             message = f"The campaign provided from user: '{user_id}' is not valid: {serializer.errors}"
             raise CampaignInvalidException(message)
         campaign = serializer.create(serializer.validated_data)
-        created_campaign = CampaignUtils.create_default_campaign(self.profile_provider.get_by_user_id(user_id=user_id)._id,
+        created_campaign = CampaignUtils.create_default_campaign(profile_id,
                                                                  campaign,
                                                                  self.campaign_provider,
                                                                  self.collection_provider)

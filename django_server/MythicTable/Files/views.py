@@ -40,6 +40,7 @@ class FileListView(FileProviderView):
         Returns:
             Response: The response containing the serialized files.
         """
+        # Extension: store user_id and profile_id with a caching system to avoid JWT authentication and DB Lookup every time a request is made
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(self.profile_provider.get_by_user_id(user_id)._id)
         if path:
@@ -59,6 +60,7 @@ class FileListView(FileProviderView):
         Returns:
             Response: The response containing information about the uploaded files.
         """
+        # Extension: store user_id and profile_id with a caching system to avoid JWT authentication and DB Lookup every time a request is made
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(self.profile_provider.get_by_user_id(user_id)._id)
         path = request.query_params.get('path')
@@ -100,12 +102,14 @@ class FileView(FileProviderView):
         Returns:
             Response: The response containing the serialized file.
         """
+        # Extension: store user_id and profile_id with a caching system to avoid JWT authentication and DB Lookup every time a request is made
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(self.profile_provider.get_by_user_id(user_id)._id)
         file = self.file_provider.get(fileId, profile_id)
         serializer = FileAPISerializer(file)
         return Response(serializer.data)
     
+    #TODO: test this
     def delete(self, request, fileId=list[str]):
         """
         Delete files.
@@ -117,13 +121,14 @@ class FileView(FileProviderView):
         Returns:
             Response: The response containing information about the deleted files.
         """
+        # Extension: store user_id and profile_id with a caching system to avoid JWT authentication and DB Lookup every time a request is made
         user_id = request.session["userinfo"]["sub"]
         profile_id = str(self.profile_provider.get_by_user_id(user_id)._id)
         files_to_delete = []
         files_found = []
         for file_id in fileId:
-            file = self.file_provider.get(fileId, profile_id)
-            self.file_provider.delete(fileId, profile_id)
+            file = self.file_provider.get(file_id, profile_id)
+            self.file_provider.delete(file_id, profile_id)
             files_found.append(file)
 
             if self.file_provider.find_duplicate(file.user, file.md5) is None:

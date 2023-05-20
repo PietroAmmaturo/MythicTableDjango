@@ -140,7 +140,7 @@ class MongoDbPermissionProvider(MongoDbProvider):
         return result.deleted_count
 
     # is_authorized is legacy, this is how permissions were handled in the legacy code, actually permissions are never created, deleted or modified at all
-    # expanding the permission system might be a possible extension of this project
+    # Extension: expanding the permission system might be a possible extension of this project
     def is_authorized(self, profile_id: str, campaign_id: str, object_id: str) -> bool:
         """
         Check if a user is authorized for a permission.
