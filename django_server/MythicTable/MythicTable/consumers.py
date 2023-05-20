@@ -31,6 +31,15 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
         self.authentication = AuthenticationBackend()
 
     async def validate_campaign_member(self, campaign_id):
+        """
+        Validates if the user is a member of the given campaign.
+
+        Args:
+            campaign_id (str): The ID of the campaign.
+
+        Raises:
+            UnauthorizedException: If the user is not a member of the campaign.
+        """
         campaign = self.campaign_provider.get(campaign_id)
         profile_id = str(self.profile_provider.get_by_user_id(self.scope["session"]["userinfo"]["sub"])._id)
         if campaign.owner != profile_id and not any(player.name == profile_id for player in campaign.players):
@@ -38,6 +47,12 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
             raise UnauthorizedException(error_message)
         
     async def connect(self):
+        """
+        Handles the WebSocket connection establishment.
+
+        If the user is authenticated, accepts the connection and sends an acceptance message.
+        Otherwise, closes the connection.
+        """
         user = await sync_to_async(self.authentication.authenticate, thread_sensitive=True)(scope=self.scope)
         if user is not None:
             await self.accept()
@@ -49,6 +64,12 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
             await self.close()
 
     async def receive(self, text_data):
+        """
+        Handles the reception of messages from the WebSocket connection.
+
+        Args:
+            text_data (str): The received message in JSON format.
+        """
         # convert received data to a dictionary
         data = json.loads(text_data)
 
@@ -72,6 +93,14 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
                 await self.handle_unknown_type(data)
 
     async def handle_join_session(self, data):
+        """
+        Handles the 'join_session' message type.
+
+        Joins the specified session group and sends an acceptance message.
+
+        Args:
+            data (dict): The message data.
+        """
         try:
             group_name = data['request']['campaignId']
             await self.channel_layer.group_add(group_name, self.channel_name)
@@ -91,6 +120,14 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
             }))
 
     async def handle_roll_dice(self, data):
+        """
+        Handles the 'roll_dice' message type.
+
+        Performs actions related to rolling dice in the specified campaign.
+
+        Args:
+            data (dict): The message data.
+        """
         try:
             group_name = data['payload']['campaignId']
             message_data = data['payload']['diceObject']
@@ -119,6 +156,14 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
             }))
 
     async def handle_update_object(self, data):
+        """
+        Handles the 'update_object' message type.
+
+        Updates an object in the specified campaign.
+
+        Args:
+            data (dict): The message data.
+        """
         try:
             group_name = data['payload']['campaignId']
             profile_id = str(self.profile_provider.get_by_user_id(self.scope["session"]["userinfo"]["sub"])._id)
@@ -146,6 +191,14 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
             }))
     
     async def handle_add_collection_item(self, data):
+        """
+        Handles the 'add_collection_item' message type.
+
+        Adds an item to a collection in the specified campaign.
+
+        Args:
+            data (dict): The message data.
+        """
         try:
             group_name = data['payload']['campaignId']
             profile_id = str(self.profile_provider.get_by_user_id(self.scope["session"]["userinfo"]["sub"])._id)
@@ -172,6 +225,14 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
             }))
     
     async def handle_remove_campaign_object(self, data):
+        """
+        Handles the 'remove_campaign_object' message type.
+
+        Removes an object from the specified campaign.
+
+        Args:
+            data (dict): The message data.
+        """
         try:
             group_name = data['payload']['campaignId']
             profile_id = str(self.profile_provider.get_by_user_id(self.scope["session"]["userinfo"]["sub"])._id)
@@ -199,6 +260,14 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
             }))
 
     async def handle_draw_line(self, data):
+        """
+        Handles the 'draw_line' message type.
+
+        Draws a line on the canvas in the specified campaign.
+
+        Args:
+            data (dict): The message data.
+        """
         try:
             group_name = data['payload']['campaignId']
             line = data['payload']['line']
@@ -218,6 +287,12 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
             }))
 
     async def handle_unknown_type(self, data):
+        """
+        Handles unknown message types.
+
+        Args:
+            data (dict): The message data.
+        """
         try:
             raise MythicTableException("Unknown message type")
         except Exception as e:
@@ -227,6 +302,14 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
             }))
 
     async def message_received(self, data):
+        """
+        Handles the 'message_received' event.
+
+        Sends the received message to the WebSocket connection.
+
+        Args:
+            event (dict): The event data.
+        """
         message = {
             "type": "message_received",
             "message": data["message"]
@@ -234,6 +317,15 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=dumps(message))
 
     async def object_added(self, data):
+        """
+        Sends a notification to the client about an object being added to a collection.
+
+        Args:
+            data (dict): The data containing information about the added object.
+                It should include the following keys:
+                - 'collection': The name of the collection.
+                - 'item': The added item.
+        """
         message = {
                 "type": "object_added",
                 "collection": data['collection'],
@@ -242,6 +334,14 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=dumps(message))
 
     async def object_updated(self, data):
+        """
+        Handles the 'object_updated' event.
+
+        Sends the updated object data to the WebSocket connection.
+
+        Args:
+            event (dict): The event data.
+        """
         message = {
                 "type": "object_updated",
                 "parameters": data['parameters']
@@ -249,6 +349,14 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=dumps(message))
 
     async def object_removed(self, data):
+        """
+        Handles the 'object_removed' event.
+
+        Sends the removed object data to the WebSocket connection.
+
+        Args:
+            event (dict): The event data.
+        """
         message = {
                 "type": "object_removed",
                 "collection": data['collection'],
@@ -257,6 +365,14 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=dumps(message))
 
     async def line_drawn(self, data):
+        """
+        Handles the 'line_drawn' event.
+
+        Sends the drawn line data to the WebSocket connection.
+
+        Args:
+            event (dict): The event data.
+        """
         message = {
                 "type": "line_drawn",
                 "line": data['line']
