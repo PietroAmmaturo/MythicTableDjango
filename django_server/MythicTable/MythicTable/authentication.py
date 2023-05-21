@@ -72,6 +72,6 @@ class AuthenticationBackend(BasicAuthentication):
             scope['session']["userinfo"] = userinfo
             return (user, None)
         else:
-            request['session']["userinfo"] = userinfo
+            request.session["userinfo"] = userinfo
             return [user, None]
 
