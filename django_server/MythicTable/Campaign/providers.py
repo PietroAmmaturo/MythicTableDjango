@@ -201,7 +201,7 @@ class MongoDbCampaignProvider(MongoDbProvider):
             CampaignAddPlayerException: If the player is already in the campaign.
         """
         campaign = self.get(campaign_id)
-        if any(p["name"] == player.name for p in campaign.players):
+        if any(p.name == player.name for p in campaign.players):
             raise CampaignAddPlayerException(
                 f"The player '{player.name}' is already in campaign {campaign_id}")
         serializer = PlayerDBSerializer(player)
