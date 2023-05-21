@@ -20,6 +20,7 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
     collection_provider = None
     permission_provider = None
     profile_provider = None
+    group_name = None
     def __init__(self, profile_provider=None, permission_provider=None, campaign_provider=None, collection_provider=None, client=None, db_name=None):
         super().__init__()
         self.client = client
@@ -29,6 +30,7 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
         self.permission_provider = permission_provider or MongoDbPermissionProvider(self.client, self.db_name)
         self.profile_provider = profile_provider or MongoDbProfileProvider(self.client, self.db_name)
         self.authentication = AuthenticationBackend()
+        self.group_name = None
 
     async def validate_campaign_member(self, campaign_id):
         """
@@ -63,6 +65,22 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
         else:
             await self.close()
 
+    async def disconnect(self, close_code):
+        """
+        Handles the WebSocket disconnection.
+
+        If the user is in a group, discards the group and sets self.group_name to None.
+        """
+        if self.group_name:
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)
+            self.group_name = None
+        if close_code == 1001:
+            print("User intentionally disconnected.")
+        elif close_code in (1006, 1011):
+            print("User disconnected unexpectedly.")
+        else:
+            print("User disconnected with code:", close_code)
+            
     async def receive(self, text_data):
         """
         Handles the reception of messages from the WebSocket connection.
@@ -104,6 +122,7 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
         try:
             group_name = data['request']['campaignId']
             await self.channel_layer.group_add(group_name, self.channel_name)
+            self.group_name = group_name
             message = {
                 "type": "join_accept",
                 "message": "This is a reply from the server."
@@ -118,6 +137,7 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
                 'type': 'exception_raised',
                 'message': e
             }))
+            await self.close()
 
     async def handle_roll_dice(self, data):
         """

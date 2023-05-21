@@ -105,7 +105,7 @@ class LivePlayDirector {
     }
 
     async disconnect() {
-        await this.connection.close();
+        await this.connection.socket.close();
         this.state.connected = false;
     }
 
