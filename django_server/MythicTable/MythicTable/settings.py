@@ -41,7 +41,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',') if os.environ.get('ALLOWED_HOSTS') else ['*']
 
-APPEND_SLASH=False
+APPEND_SLASH = True
 
 # Application definition
 
