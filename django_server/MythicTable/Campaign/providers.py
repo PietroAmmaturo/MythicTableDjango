@@ -234,10 +234,10 @@ class MongoDbCampaignProvider(MongoDbProvider):
         """
         try:
             campaign = self.get(campaign_id)
-            number_removed = len([p for p in campaign.players if p["name"] == player.name])
+            number_removed = len([p for p in campaign.players if p.name == player.name])
             if number_removed == 0:
                 raise CampaignRemovePlayerException(f"The player '{player.name}' is not in campaign {campaign_id}")
-            campaign.players = [p for p in campaign.players if p["name"] != player.name]
+            campaign.players = [p for p in campaign.players if p.name != player.name]
             return self.update(campaign_id, campaign)
         except CampaignNotFoundException:
             raise CampaignNotFoundException(

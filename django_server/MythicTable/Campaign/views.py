@@ -196,14 +196,13 @@ class CampaignJoinView(CampaignProviderView):
 
 
 class CampaignLeaveView(CampaignProviderView):
-    def put(self, request, campaignId, playerId):
+    def put(self, request, campaignId):
         """
         Remove a player from a campaign.
 
         Args:
             request: The request object.
             campaignId: The ID of the campaign.
-            playerId: The ID of the player.
 
         Returns:
             Response with the serialized campaign.
