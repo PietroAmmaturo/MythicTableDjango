@@ -5,9 +5,7 @@ from .models import Campaign, Player, Message, MessageContainer
 from django.utils import timezone
 from MythicTable.serializers import ObjectIdAPIField, ObjectIdDBField, DateTimeDBField
 
-########################
-#API
-########################
+
 class PlayerAPISerializer(serializers.ModelSerializer):
     id = ObjectIdAPIField(default=None, allow_null=True,
                           required=False, source='_id')
@@ -19,10 +17,8 @@ class PlayerAPISerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         if isinstance(validated_data, list):
-            # If validated_data is a list, create an instance for each dictionary
             return [self.create_instance(instance_data) for instance_data in validated_data]
         else:
-            # If validated_data is not a list, create a single instance
             return self.create_instance(validated_data)
 
     def create_instance(self, instance_data):
@@ -47,7 +43,6 @@ class CampaignAPISerializer(serializers.ModelSerializer):
     tutorialCampaign = serializers.BooleanField(
         default=False, source='tutorial_campaign')
 
-    # specify model and fields
     class Meta:
         model = Campaign
         fields = ('id', 'joinId', 'owner', 'name', 'description', 'imageUrl',
@@ -55,16 +50,15 @@ class CampaignAPISerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         if isinstance(validated_data, list):
-            # If validated_data is a list, create an instance for each dictionary
             return [self.create_instance(instance_data) for instance_data in validated_data]
         else:
-            # If validated_data is not a list, create a single instance
             return self.create_instance(validated_data)
 
     def create_instance(self, instance_data):
         if 'last_modified' not in instance_data or not instance_data['last_modified']:
             instance_data['last_modified'] = instance_data['created']
         campaign = Campaign(**instance_data)
+        # manually adding players, because PlayerAPISerializer has a custom create
         players_data = instance_data.pop('players', None)
         if players_data:
             campaign.players = PlayerAPISerializer().create(players_data)
@@ -87,10 +81,8 @@ class MessageAPISerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         if isinstance(validated_data, list):
-            # If validated_data is a list, create an instance for each dictionary
             return [self.create_instance(instance_data) for instance_data in validated_data]
         else:
-            # If validated_data is not a list, create a single instance
             return self.create_instance(validated_data)
 
     def create_instance(self, instance_data):
@@ -100,9 +92,7 @@ class MessageAPISerializer(serializers.ModelSerializer):
             instance_data['result'] = ChatParser().parse(instance_data["message"])
         message = Message(**instance_data)
         return message
-########################
-#DB
-########################
+
 class PlayerDBSerializer(serializers.ModelSerializer):
     _id = ObjectIdDBField()
     Name = serializers.CharField(source='name')
@@ -113,10 +103,8 @@ class PlayerDBSerializer(serializers.ModelSerializer):
         
     def create(self, validated_data):
         if isinstance(validated_data, list):
-            # If validated_data is a list, create an instance for each dictionary
             return [self.create_instance(instance_data) for instance_data in validated_data]
         else:
-            # If validated_data is not a list, create a single instance
             return self.create_instance(validated_data)
 
     def create_instance(self, instance_data):
@@ -145,14 +133,13 @@ class CampaignDBSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         if isinstance(validated_data, list):
-            # If validated_data is a list, create an instance for each dictionary
             return [self.create_instance(instance_data) for instance_data in validated_data]
         else:
-            # If validated_data is not a list, create a single instance
             return self.create_instance(validated_data)
 
     def create_instance(self, instance_data):
         campaign = Campaign(**instance_data)
+        # manually adding players, because PlayerAPISerializer has a custom create
         players_data = instance_data.pop('players', None)
         if players_data:
             campaign.players = PlayerDBSerializer().create(players_data)
@@ -175,10 +162,8 @@ class MessageDBSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         if isinstance(validated_data, list):
-            # If validated_data is a list, create an instance for each dictionary
             return [self.create_instance(instance_data) for instance_data in validated_data]
         else:
-            # If validated_data is not a list, create a single instance
             return self.create_instance(validated_data)
 
     def create_instance(self, instance_data):
@@ -196,10 +181,8 @@ class MessageContainerDBSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         if isinstance(validated_data, list):
-            # If validated_data is a list, create an instance for each dictionary
             return [self.create_instance(instance_data) for instance_data in validated_data]
         else:
-            # If validated_data is not a list, create a single instance
             return self.create_instance(validated_data)
 
     def create_instance(self, instance_data):

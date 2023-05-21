@@ -27,7 +27,6 @@ class LocalFileStore(IFileStore):
         file_path = os.path.join(self.path, file_name)
         FileWriter.create_directory(os.path.dirname(file_path))
         path = FileWriter.copy_to_file(form_file, file_path)
-        print(path)
         return {"reference": path, "url": self.url_prefix + file_name}
 
     def delete_files(self, files: list[File]) -> None:

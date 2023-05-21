@@ -11,17 +11,14 @@ class FileAPISerializer(serializers.ModelSerializer):
     url = serializers.CharField()
     md5 = serializers.CharField()
 
-    # specify model and fields
     class Meta:
         model = File
         fields = ('id', 'reference', 'path', 'name', 'user', 'url', 'md5')
 
     def create(self, validated_data):
         if isinstance(validated_data, list):
-            # If validated_data is a list, create an instance for each dictionary
             return [self.create_instance(instance_data) for instance_data in validated_data]
         else:
-            # If validated_data is not a list, create a single instance
             return self.create_instance(validated_data)
 
     def create_instance(self, instance_data):
@@ -37,17 +34,14 @@ class FileDBSerializer(serializers.ModelSerializer):
     url = serializers.CharField()
     md5 = serializers.CharField()
 
-    # specify model and fields
     class Meta:
         model = File
         fields = ('_id', 'reference', 'path', 'name', 'user', 'url', 'md5')
         
     def create(self, validated_data):
         if isinstance(validated_data, list):
-            # If validated_data is a list, create an instance for each dictionary
             return [self.create_instance(instance_data) for instance_data in validated_data]
         else:
-            # If validated_data is not a list, create a single instance
             return self.create_instance(validated_data)
 
     def create_instance(self, instance_data):

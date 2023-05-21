@@ -23,7 +23,6 @@ class UserOwnsCampaign(BasePermission):
 
         campaign = view.campaign_provider.get(campaign_id)
         profile_id = str(view.profile_provider.get_by_user_id(current_user)._id)
-        print(campaign.owner, profile_id)
         if campaign.owner != profile_id:
             raise UserDoesNotOwnCampaignException(campaign_id)
 

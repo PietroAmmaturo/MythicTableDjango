@@ -74,12 +74,6 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
         if self.group_name:
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
             self.group_name = None
-        if close_code == 1001:
-            print("User intentionally disconnected.")
-        elif close_code in (1006, 1011):
-            print("User disconnected unexpectedly.")
-        else:
-            print("User disconnected with code:", close_code)
             
     async def receive(self, text_data):
         """
@@ -99,7 +93,6 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
             'add_collection_item': self.handle_add_collection_item,
             'remove_campaign_object': self.handle_remove_campaign_object,
             'draw_line': self.handle_draw_line,
-            'message_received': self.message_received
         }
 
         # check if the message type exists in the dictionary and call the appropriate function
@@ -135,7 +128,7 @@ class LivePlayConsumer(AsyncWebsocketConsumer):
             }))
             await self.send(text_data=json.dumps({
                 'type': 'exception_raised',
-                'message': e
+                'message': str(e)
             }))
             await self.close()
 

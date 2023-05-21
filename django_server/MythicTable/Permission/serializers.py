@@ -9,17 +9,14 @@ class PermissionAPISerializer(serializers.ModelSerializer):
     campaign = serializers.CharField(source='campaign')
     object = serializers.BooleanField(source='object')
 
-    # specify model and fields
     class Meta:
         model = Permission
         fields = ('id', 'isPublic', 'permitted', 'campaign', 'object')
 
     def create(self, validated_data):
         if isinstance(validated_data, list):
-            # If validated_data is a list, create an instance for each dictionary
             return [self.create_instance(instance_data) for instance_data in validated_data]
         else:
-            # If validated_data is not a list, create a single instance
             return self.create_instance(validated_data)
 
     def create_instance(self, instance_data):
@@ -33,17 +30,14 @@ class PermissionDBSerializer(serializers.ModelSerializer):
     Campaign = serializers.CharField(source='campaign')
     Object = serializers.BooleanField(source='object')
 
-    # specify model and fields
     class Meta:
         model = Permission
         fields = ('_id', 'IsPublic', 'Permitted', 'Campaign', 'Object')
 
     def create(self, validated_data):
         if isinstance(validated_data, list):
-            # If validated_data is a list, create an instance for each dictionary
             return [self.create_instance(instance_data) for instance_data in validated_data]
         else:
-            # If validated_data is not a list, create a single instance
             return self.create_instance(validated_data)
 
     def create_instance(self, instance_data):

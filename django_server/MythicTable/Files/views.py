@@ -109,7 +109,7 @@ class FileView(FileProviderView):
         serializer = FileAPISerializer(file)
         return Response(serializer.data)
     
-    #TODO: test this
+    #TODO: test this (this function is never used from the frontend)
     def delete(self, request, fileId=list[str]):
         """
         Delete files.
