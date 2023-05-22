@@ -32,12 +32,7 @@ class JsonPatchTranslator:
             raise ValueError("Json2Bson unexpected type: null")
 
         if isinstance(json_obj, str):
-            try:
-                # If the string is a valid ObjectId, return it as such
-                return ObjectId(json_obj)
-            except InvalidId:
-                # Otherwise, return it as a regular string
-                return str(json_obj)
+            return str(json_obj)
 
         if isinstance(json_obj, int):
             return json_obj
